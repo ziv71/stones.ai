@@ -194,6 +194,28 @@ const stones = [
 ];
 
 const MIN_RELIABLE_CONFIDENCE = 66;
+const ML_LABEL_MAP = {
+  granite: "granite",
+  basalt: "basalt",
+  marble: "marble",
+  sandstone: "sandstone",
+  limestone: "limestone",
+  slate: "slate"
+};
+let mobileNetModel = null;
+
+async function loadMobileNetModel() {
+  if (typeof mobilenet === "undefined") return;
+  try {
+    mobileNetModel = await mobilenet.load();
+    console.log("MobileNet model loaded");
+  } catch (error) {
+    console.warn("Failed to load MobileNet model", error);
+    mobileNetModel = null;
+  }
+}
+
+loadMobileNetModel();
 
 const sampleGrid = document.querySelector("#sampleGrid");
 const previewImage = document.querySelector("#previewImage");
@@ -283,33 +305,36 @@ function chooseUpload(file) {
     previewImage.src = selectedImage;
     previewImage.style.display = "block";
     emptyState.style.display = "none";
-    analyzeImageSignature(selectedImage).then((signature) => {
-      const match = matchStone(signature);
-      selectedStone = match.confidence >= MIN_RELIABLE_CONFIDENCE
+    analyzeImageSignature(selectedImage).then(({ signature, quality, mlLabels }) => {
+      const match = matchStone(signature, mlLabels);
+      selectedStone = match.confidence >= MIN_RELIABLE_CONFIDENCE && quality.score >= 50
         ? {
             ...match.stone,
             confidence: match.confidence,
             matchedSignature: signature,
             secondChoice: match.secondChoice,
+            mlLabels,
+            quality,
             isUncertain: false
           }
-        : createUncertainResult(match, signature);
+        : createUncertainResult(match, signature, quality, mlLabels);
       updateSignalGrid(signature);
-      scanStatus.textContent = "Image analyzed";
+      scanStatus.textContent = quality.label;
       renderSamples();
     });
   };
   reader.readAsDataURL(file);
 }
 
-function createUncertainResult(match, signature) {
+function createUncertainResult(match, signature, quality, mlLabels = []) {
+  const topWarning = quality.warnings.length ? quality.warnings[0] : `The closest stone-like profile was ${match.stone.name}, but the match is too weak to identify confidently.`;
   return {
     id: "uncertain",
     name: "No Reliable Stone Detected",
     category: "Low-confidence scan",
     colors: "Mixed image signals",
     texture: "Stone texture not clear",
-    formation: "Try a closer image of a single stone",
+    formation: topWarning,
     found: "Unknown",
     hardness: "Unknown",
     eco: 0,
@@ -318,8 +343,10 @@ function createUncertainResult(match, signature) {
     signature,
     secondChoice: match.secondChoice,
     closestStone: match.stone,
+    mlLabels,
+    quality,
     isUncertain: true,
-    fact: `The closest stone-like profile was ${match.stone.name}, but the match is too weak to identify confidently.`,
+    fact: topWarning,
     ecology: [
       "The scanner needs a clear view of the stone surface before giving ecology guidance.",
       "Use a close-up photo with the stone filling most of the frame.",
@@ -343,14 +370,19 @@ function createUncertainResult(match, signature) {
 function analyzeImageSignature(src) {
   return new Promise((resolve) => {
     const image = new Image();
-    image.onload = () => {
+    image.crossOrigin = "anonymous";
+    image.onload = async () => {
+      const square = Math.min(image.width, image.height);
+      const size = 160;
       const canvas = document.createElement("canvas");
-      const size = 96;
       canvas.width = size;
       canvas.height = size;
       const context = canvas.getContext("2d", { willReadFrequently: true });
-      context.drawImage(image, 0, 0, size, size);
-      const pixels = context.getImageData(0, 0, size, size).data;
+      const sx = (image.width - square) / 2;
+      const sy = (image.height - square) / 2;
+      context.drawImage(image, sx, sy, square, square, 0, 0, size, size);
+      const imageData = context.getImageData(0, 0, size, size);
+      const pixels = imageData.data;
       let brightness = 0;
       let saturation = 0;
       let warmth = 0;
@@ -384,20 +416,33 @@ function analyzeImageSignature(src) {
         if (y < size - 1) edgeSum += Math.abs(luma[i] - luma[i + size]);
       }
 
-      resolve({
+      const signature = {
         brightness,
         saturation,
         warmth,
         contrast: clamp(contrastSum / total * 3.2),
         edge: clamp(edgeSum / (total * 2) * 5)
-      });
+      };
+
+      const quality = assessImageQuality(imageData, signature);
+      const mlLabels = await predictImageLabels(image);
+
+      resolve({ signature, quality, mlLabels });
     };
-    image.onerror = () => resolve(stones[0].signature);
+    image.onerror = () => resolve({
+      signature: stones[0].signature,
+      quality: {
+        score: 0,
+        label: "Image load error",
+        warnings: ["Unable to load the uploaded image."]
+      },
+      mlLabels: []
+    });
     image.src = src;
   });
 }
 
-function matchStone(signature) {
+function matchStone(signature, mlLabels = []) {
   const weights = {
     brightness: 1.35,
     saturation: 0.95,
@@ -412,11 +457,135 @@ function matchStone(signature) {
     return { stone, distance };
   }).sort((a, b) => a.distance - b.distance);
 
-  const confidence = Math.round(clamp(1 - ranked[0].distance / 1.85, 0.58, 0.96) * 100);
+  const baselineConfidence = Math.round(clamp(1 - ranked[0].distance / 1.85, 0.58, 0.96) * 100);
+  const mlMatch = findMlStoneMatch(mlLabels);
+
+  if (mlMatch && mlMatch.probability > 0.45) {
+    const mlConfidence = Math.round(clamp(0.8 + mlMatch.probability * 0.2, 0, 1) * 100);
+    if (mlMatch.stone.id === ranked[0].stone.id || baselineConfidence < 75) {
+      return {
+        stone: mlMatch.stone,
+        secondChoice: ranked[0].stone.id === mlMatch.stone.id ? ranked[1].stone : ranked[0].stone,
+        confidence: Math.max(baselineConfidence, mlConfidence)
+      };
+    }
+  }
+
   return {
     stone: ranked[0].stone,
     secondChoice: ranked[1].stone,
-    confidence
+    confidence: baselineConfidence
+  };
+}
+
+function findMlStoneMatch(labels) {
+  if (!labels || !labels.length) return null;
+  const synonyms = {
+    granite: "granite",
+    basalt: "basalt",
+    marble: "marble",
+    sandstone: "sandstone",
+    limestone: "limestone",
+    slate: "slate",
+    quartz: "marble",
+    amethyst: "marble",
+    stone: null,
+    rock: null,
+    crystal: null,
+    "volcanic rock": "basalt",
+    "metamorphic rock": "slate",
+    "sedimentary rock": "sandstone"
+  };
+
+  const normalized = labels.flatMap((entry) => {
+    return entry.className.toLowerCase().split(/[,&]/g).map((part) => ({
+      label: part.trim(),
+      probability: entry.probability
+    }));
+  });
+
+  for (const entry of normalized.sort((a, b) => b.probability - a.probability)) {
+    const key = entry.label.replace(/[^a-z0-9 ]/g, "").trim();
+    if (synonyms[key] && ML_LABEL_MAP[synonyms[key]]) {
+      return { stone: stones.find((stone) => stone.id === synonyms[key]), probability: entry.probability };
+    }
+    if (ML_LABEL_MAP[key]) {
+      return { stone: stones.find((stone) => stone.id === key), probability: entry.probability };
+    }
+  }
+
+  return null;
+}
+
+function predictImageLabels(image) {
+  if (!mobileNetModel) return Promise.resolve([]);
+  return mobileNetModel.classify(image, 5).catch(() => []);
+}
+
+function assessImageQuality(imageData, signature) {
+  const size = Math.sqrt(imageData.data.length / 4);
+  const pixels = imageData.data;
+  let borderLuma = 0;
+  let borderCount = 0;
+  let centerLuma = 0;
+  let centerCount = 0;
+  let sharpness = 0;
+
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      const index = (y * size + x) * 4;
+      const r = pixels[index] / 255;
+      const g = pixels[index + 1] / 255;
+      const b = pixels[index + 2] / 255;
+      const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      const isBorder = x < 12 || x >= size - 12 || y < 12 || y >= size - 12;
+      if (isBorder) {
+        borderLuma += luma;
+        borderCount += 1;
+      } else {
+        centerLuma += luma;
+        centerCount += 1;
+      }
+
+      if (x < size - 1) {
+        const right = (y * size + x + 1) * 4;
+        const rightLuma = 0.2126 * (pixels[right] / 255) + 0.7152 * (pixels[right + 1] / 255) + 0.0722 * (pixels[right + 2] / 255);
+        sharpness += Math.abs(luma - rightLuma);
+      }
+      if (y < size - 1) {
+        const down = ((y + 1) * size + x) * 4;
+        const downLuma = 0.2126 * (pixels[down] / 255) + 0.7152 * (pixels[down + 1] / 255) + 0.0722 * (pixels[down + 2] / 255);
+        sharpness += Math.abs(luma - downLuma);
+      }
+    }
+  }
+
+  const borderAvg = borderCount ? borderLuma / borderCount : 0;
+  const centerAvg = centerCount ? centerLuma / centerCount : 0;
+  const borderDifference = Math.abs(borderAvg - centerAvg);
+  const sharpnessScore = clamp(sharpness / (size * size * 2) * 6);
+  const sizeScore = clamp(Math.min(size, size) / 140);
+  const contrastScore = signature.contrast;
+  const brightnessScore = 1 - Math.abs(signature.brightness - 0.5) * 1.6;
+  const overall = clamp((sharpnessScore * 0.35) + (sizeScore * 0.25) + (contrastScore * 0.2) + (brightnessScore * 0.2));
+
+  const warnings = [];
+  if (sizeScore < 0.55) warnings.push("The stone is too small in the frame. Crop closer to the object.");
+  if (sharpnessScore < 0.25) warnings.push("The image looks soft or blurred. Use a sharper focus.");
+  if (borderDifference < 0.04) warnings.push("The background is too uniform or low contrast. Use a cleaner backdrop.");
+  if (signature.brightness < 0.18) warnings.push("The scan is too dark. Add more light or avoid shadows.");
+  if (signature.brightness > 0.88) warnings.push("The scan is too bright. Reduce glare and bright reflections.");
+
+  const label = warnings.length ? warnings[0] : "Ready to identify";
+
+  return {
+    score: Math.round(overall * 100),
+    label,
+    warnings,
+    sharpness: Math.round(sharpnessScore * 100),
+    sizeScore: Math.round(sizeScore * 100),
+    brightness: Math.round(signature.brightness * 100),
+    contrast: Math.round(contrastScore * 100)
   };
 }
 

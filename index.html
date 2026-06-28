@@ -75,14 +75,6 @@
                 <div><span>Contrast</span><strong>--</strong></div>
                 <div><span>Texture</span><strong>--</strong></div>
               </div>
-              <div class="quality-panel" id="qualityPanel" aria-live="polite">
-                <div class="quality-head">
-                  <span class="quality-title">Image readiness</span>
-                  <strong id="qualitySummary">Waiting for scan</strong>
-                </div>
-                <div class="quality-bar" aria-hidden="true"><span id="qualityBarFill"></span></div>
-                <ul id="qualityTips"></ul>
-              </div>
               <div class="scanner-actions">
                 <label class="primary-button file-button" for="fileInput">Upload Image</label>
                 <input id="fileInput" type="file" accept="image/*" />
@@ -141,7 +133,6 @@
                 <strong id="confidenceValue">94%</strong>
                 <span>match</span>
               </div>
-              <p class="quality-notice" id="qualityNotice"></p>
             </div>
 
             <div class="quick-facts" id="quickFacts"></div>
@@ -202,8 +193,6 @@
       </section>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.13.0/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@3.1.0/dist/mobilenet.min.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

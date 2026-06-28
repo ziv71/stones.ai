@@ -1,6 +1,6 @@
 const stones = [
   {
-    id: "granite",
+    id: "granioishdfoihjdsoklfjlksdjflkjsdlkjsdlksste",
     name: "Granite",
     category: "Igneous rock",
     colors: "White, black, gray, pink",
@@ -194,28 +194,6 @@ const stones = [
 ];
 
 const MIN_RELIABLE_CONFIDENCE = 66;
-const ML_LABEL_MAP = {
-  granite: "granite",
-  basalt: "basalt",
-  marble: "marble",
-  sandstone: "sandstone",
-  limestone: "limestone",
-  slate: "slate"
-};
-let mobileNetModel = null;
-
-async function loadMobileNetModel() {
-  if (typeof mobilenet === "undefined") return;
-  try {
-    mobileNetModel = await mobilenet.load();
-    console.log("MobileNet model loaded");
-  } catch (error) {
-    console.warn("Failed to load MobileNet model", error);
-    mobileNetModel = null;
-  }
-}
-
-loadMobileNetModel();
 
 const sampleGrid = document.querySelector("#sampleGrid");
 const previewImage = document.querySelector("#previewImage");
@@ -231,11 +209,6 @@ const dropZone = document.querySelector("#dropZone");
 const tabPanel = document.querySelector("#tabPanel");
 const scanStatus = document.querySelector("#scanStatus");
 const signalGrid = document.querySelector("#signalGrid");
-const qualityPanel = document.querySelector("#qualityPanel");
-const qualitySummary = document.querySelector("#qualitySummary");
-const qualityBarFill = document.querySelector("#qualityBarFill");
-const qualityTips = document.querySelector("#qualityTips");
-const qualityNotice = document.querySelector("#qualityNotice");
 const resultStoneArt = document.querySelector("#resultStoneArt");
 const navButtons = document.querySelectorAll(".nav-button");
 const appPages = document.querySelectorAll(".app-page");
@@ -310,37 +283,33 @@ function chooseUpload(file) {
     previewImage.src = selectedImage;
     previewImage.style.display = "block";
     emptyState.style.display = "none";
-    analyzeImageSignature(selectedImage).then(({ signature, quality, mlLabels }) => {
-      const match = matchStone(signature, mlLabels);
-      selectedStone = match.confidence >= MIN_RELIABLE_CONFIDENCE && quality.score >= 50
+    analyzeImageSignature(selectedImage).then((signature) => {
+      const match = matchStone(signature);
+      selectedStone = match.confidence >= MIN_RELIABLE_CONFIDENCE
         ? {
             ...match.stone,
             confidence: match.confidence,
             matchedSignature: signature,
             secondChoice: match.secondChoice,
-            mlLabels,
-            quality,
             isUncertain: false
           }
-        : createUncertainResult(match, signature, quality, mlLabels);
+        : createUncertainResult(match, signature);
       updateSignalGrid(signature);
-      renderQualityPanel(quality);
-      scanStatus.textContent = quality.label;
+      scanStatus.textContent = "Image analyzed";
       renderSamples();
     });
   };
   reader.readAsDataURL(file);
 }
 
-function createUncertainResult(match, signature, quality, mlLabels = []) {
-  const topWarning = quality.warnings.length ? quality.warnings[0] : `The closest stone-like profile was ${match.stone.name}, but the match is too weak to identify confidently.`;
+function createUncertainResult(match, signature) {
   return {
     id: "uncertain",
     name: "No Reliable Stone Detected",
     category: "Low-confidence scan",
     colors: "Mixed image signals",
     texture: "Stone texture not clear",
-    formation: topWarning,
+    formation: "Try a closer image of a single stone",
     found: "Unknown",
     hardness: "Unknown",
     eco: 0,
@@ -349,10 +318,8 @@ function createUncertainResult(match, signature, quality, mlLabels = []) {
     signature,
     secondChoice: match.secondChoice,
     closestStone: match.stone,
-    mlLabels,
-    quality,
     isUncertain: true,
-    fact: topWarning,
+    fact: `The closest stone-like profile was ${match.stone.name}, but the match is too weak to identify confidently.`,
     ecology: [
       "The scanner needs a clear view of the stone surface before giving ecology guidance.",
       "Use a close-up photo with the stone filling most of the frame.",
@@ -376,92 +343,61 @@ function createUncertainResult(match, signature, quality, mlLabels = []) {
 function analyzeImageSignature(src) {
   return new Promise((resolve) => {
     const image = new Image();
-    image.crossOrigin = "anonymous";
-    image.onload = async () => {
-      const square = Math.min(image.width, image.height);
-      const size = 160;
+    image.onload = () => {
       const canvas = document.createElement("canvas");
+      const size = 96;
       canvas.width = size;
       canvas.height = size;
       const context = canvas.getContext("2d", { willReadFrequently: true });
-      const sx = (image.width - square) / 2;
-      const sy = (image.height - square) / 2;
-      context.drawImage(image, sx, sy, square, square, 0, 0, size, size);
-      const imageData = context.getImageData(0, 0, size, size);
-      const pixels = imageData.data;
+      context.drawImage(image, 0, 0, size, size);
+      const pixels = context.getImageData(0, 0, size, size).data;
       let brightness = 0;
       let saturation = 0;
       let warmth = 0;
       let contrastSum = 0;
       let edgeSum = 0;
-      let foregroundCount = 0;
       const luma = [];
 
-      for (let y = 0; y < size; y += 1) {
-        for (let x = 0; x < size; x += 1) {
-          const index = (y * size + x) * 4;
-          const r = pixels[index] / 255;
-          const g = pixels[index + 1] / 255;
-          const b = pixels[index + 2] / 255;
-          const max = Math.max(r, g, b);
-          const min = Math.min(r, g, b);
-          const light = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-          const sat = max === 0 ? 0 : (max - min) / max;
-          const warm = clamp((r + 0.35 * g - b + 0.35) / 1.7);
-          const isCenterRegion = x > size * 0.2 && x < size * 0.8 && y > size * 0.2 && y < size * 0.8;
-          const isForeground = isCenterRegion && sat > 0.08 && light > 0.06 && light < 0.95;
-
-          if (isForeground) {
-            foregroundCount += 1;
-            brightness += light;
-            saturation += sat;
-            warmth += warm;
-            luma.push(light);
-            contrastSum += Math.abs(light - 0.5);
-          }
-
-          const nextIndex = (y * size + x + 1) * 4;
-          if (x < size - 1) edgeSum += Math.abs(light - (pixels[nextIndex] / 255 * 0.2126 + pixels[nextIndex + 1] / 255 * 0.7152 + pixels[nextIndex + 2] / 255 * 0.0722));
-          if (y < size - 1) {
-            const downIndex = ((y + 1) * size + x) * 4;
-            const below = pixels[downIndex] / 255 * 0.2126 + pixels[downIndex + 1] / 255 * 0.7152 + pixels[downIndex + 2] / 255 * 0.0722;
-            edgeSum += Math.abs(light - below);
-          }
-        }
+      for (let i = 0; i < pixels.length; i += 4) {
+        const r = pixels[i] / 255;
+        const g = pixels[i + 1] / 255;
+        const b = pixels[i + 2] / 255;
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const light = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        brightness += light;
+        saturation += max === 0 ? 0 : (max - min) / max;
+        warmth += clamp((r + 0.35 * g - b + 0.35) / 1.7);
+        luma.push(light);
       }
 
-      const total = foregroundCount || size * size;
+      const total = luma.length;
       brightness /= total;
       saturation /= total;
       warmth /= total;
 
-      const signature = {
+      for (let i = 0; i < total; i += 1) {
+        contrastSum += Math.abs(luma[i] - brightness);
+        const x = i % size;
+        const y = Math.floor(i / size);
+        if (x < size - 1) edgeSum += Math.abs(luma[i] - luma[i + 1]);
+        if (y < size - 1) edgeSum += Math.abs(luma[i] - luma[i + size]);
+      }
+
+      resolve({
         brightness,
         saturation,
         warmth,
-        contrast: clamp(contrastSum / total * 2.4),
+        contrast: clamp(contrastSum / total * 3.2),
         edge: clamp(edgeSum / (total * 2) * 5)
-      };
-
-      const quality = assessImageQuality(imageData, signature, foregroundCount / (size * size));
-      const mlLabels = await predictImageLabels(image);
-
-      resolve({ signature, quality, mlLabels });
+      });
     };
-    image.onerror = () => resolve({
-      signature: stones[0].signature,
-      quality: {
-        score: 0,
-        label: "Image load error",
-        warnings: ["Unable to load the uploaded image."]
-      },
-      mlLabels: []
-    });
+    image.onerror = () => resolve(stones[0].signature);
     image.src = src;
   });
 }
 
-function matchStone(signature, mlLabels = []) {
+function matchStone(signature) {
   const weights = {
     brightness: 1.35,
     saturation: 0.95,
@@ -476,138 +412,11 @@ function matchStone(signature, mlLabels = []) {
     return { stone, distance };
   }).sort((a, b) => a.distance - b.distance);
 
-  const baselineConfidence = Math.round(clamp(1 - ranked[0].distance / 1.85, 0.58, 0.96) * 100);
-  const mlMatch = findMlStoneMatch(mlLabels);
-
-  if (mlMatch && mlMatch.probability > 0.45) {
-    const mlConfidence = Math.round(clamp(0.8 + mlMatch.probability * 0.2, 0, 1) * 100);
-    if (mlMatch.stone.id === ranked[0].stone.id || baselineConfidence < 75) {
-      return {
-        stone: mlMatch.stone,
-        secondChoice: ranked[0].stone.id === mlMatch.stone.id ? ranked[1].stone : ranked[0].stone,
-        confidence: Math.max(baselineConfidence, mlConfidence)
-      };
-    }
-  }
-
+  const confidence = Math.round(clamp(1 - ranked[0].distance / 1.85, 0.58, 0.96) * 100);
   return {
     stone: ranked[0].stone,
     secondChoice: ranked[1].stone,
-    confidence: baselineConfidence
-  };
-}
-
-function findMlStoneMatch(labels) {
-  if (!labels || !labels.length) return null;
-  const synonyms = {
-    granite: "granite",
-    basalt: "basalt",
-    marble: "marble",
-    sandstone: "sandstone",
-    limestone: "limestone",
-    slate: "slate",
-    quartz: "marble",
-    amethyst: "marble",
-    stone: null,
-    rock: null,
-    crystal: null,
-    "volcanic rock": "basalt",
-    "metamorphic rock": "slate",
-    "sedimentary rock": "sandstone"
-  };
-
-  const normalized = labels.flatMap((entry) => {
-    return entry.className.toLowerCase().split(/[,&]/g).map((part) => ({
-      label: part.trim(),
-      probability: entry.probability
-    }));
-  });
-
-  for (const entry of normalized.sort((a, b) => b.probability - a.probability)) {
-    const key = entry.label.replace(/[^a-z0-9 ]/g, "").trim();
-    if (synonyms[key] && ML_LABEL_MAP[synonyms[key]]) {
-      return { stone: stones.find((stone) => stone.id === synonyms[key]), probability: entry.probability };
-    }
-    if (ML_LABEL_MAP[key]) {
-      return { stone: stones.find((stone) => stone.id === key), probability: entry.probability };
-    }
-  }
-
-  return null;
-}
-
-function predictImageLabels(image) {
-  if (!mobileNetModel) return Promise.resolve([]);
-  return mobileNetModel.classify(image, 5).catch(() => []);
-}
-
-function assessImageQuality(imageData, signature, foregroundRatio = 0.5) {
-  const size = Math.sqrt(imageData.data.length / 4);
-  const pixels = imageData.data;
-  let borderLuma = 0;
-  let borderCount = 0;
-  let centerLuma = 0;
-  let centerCount = 0;
-  let sharpness = 0;
-
-  for (let y = 0; y < size; y += 1) {
-    for (let x = 0; x < size; x += 1) {
-      const index = (y * size + x) * 4;
-      const r = pixels[index] / 255;
-      const g = pixels[index + 1] / 255;
-      const b = pixels[index + 2] / 255;
-      const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-      const isBorder = x < 12 || x >= size - 12 || y < 12 || y >= size - 12;
-      if (isBorder) {
-        borderLuma += luma;
-        borderCount += 1;
-      } else {
-        centerLuma += luma;
-        centerCount += 1;
-      }
-
-      if (x < size - 1) {
-        const right = (y * size + x + 1) * 4;
-        const rightLuma = 0.2126 * (pixels[right] / 255) + 0.7152 * (pixels[right + 1] / 255) + 0.0722 * (pixels[right + 2] / 255);
-        sharpness += Math.abs(luma - rightLuma);
-      }
-      if (y < size - 1) {
-        const down = ((y + 1) * size + x) * 4;
-        const downLuma = 0.2126 * (pixels[down] / 255) + 0.7152 * (pixels[down + 1] / 255) + 0.0722 * (pixels[down + 2] / 255);
-        sharpness += Math.abs(luma - downLuma);
-      }
-    }
-  }
-
-  const borderAvg = borderCount ? borderLuma / borderCount : 0;
-  const centerAvg = centerCount ? centerLuma / centerCount : 0;
-  const borderDifference = Math.abs(borderAvg - centerAvg);
-  const sharpnessScore = clamp(sharpness / (size * size * 2) * 6);
-  const focusScore = clamp(foregroundRatio * 1.4);
-  const sizeScore = clamp(Math.min(size, 160) / 160);
-  const contrastScore = signature.contrast;
-  const brightnessScore = 1 - Math.abs(signature.brightness - 0.5) * 1.6;
-  const overall = clamp((sharpnessScore * 0.3) + (focusScore * 0.25) + (sizeScore * 0.2) + (contrastScore * 0.15) + (brightnessScore * 0.1));
-
-  const warnings = [];
-  if (sizeScore < 0.55) warnings.push("The stone is too small in the frame. Crop closer to the object.");
-  if (sharpnessScore < 0.25) warnings.push("The image looks soft or blurred. Use a sharper focus.");
-  if (focusScore < 0.5) warnings.push("The frame is dominated by background. Center the stone and reduce surrounding clutter.");
-  if (borderDifference < 0.04) warnings.push("The background is too uniform or low contrast. Use a cleaner backdrop.");
-  if (signature.brightness < 0.18) warnings.push("The scan is too dark. Add more light or avoid shadows.");
-  if (signature.brightness > 0.88) warnings.push("The scan is too bright. Reduce glare and bright reflections.");
-
-  const label = warnings.length ? warnings[0] : "Ready to identify";
-
-  return {
-    score: Math.round(overall * 100),
-    label,
-    warnings,
-    sharpness: Math.round(sharpnessScore * 100),
-    focus: Math.round(focusScore * 100),
-    sizeScore: Math.round(sizeScore * 100),
-    brightness: Math.round(signature.brightness * 100),
-    contrast: Math.round(contrastScore * 100)
+    confidence
   };
 }
 
@@ -652,10 +461,6 @@ function renderResult(stone) {
   document.querySelector("#stoneCategory").textContent = stone.category;
   document.querySelector("#confidenceValue").textContent = `${stone.confidence}%`;
   document.querySelector(".confidence-meter").style.setProperty("--score", `${stone.confidence}%`);
-  if (qualityNotice) {
-    const qualityText = stone.quality?.label || "Image readiness is still being evaluated.";
-    qualityNotice.textContent = stone.isUncertain ? `Quality check: ${qualityText}` : `Quality check: ${qualityText}`;
-  }
   resultStoneArt.innerHTML = stone.isUncertain ? stoneSvg((stone.closestStone || stones[0]).svg) : stoneSvg(stone.svg);
   document.querySelector("#quickFacts").innerHTML = [
     ["Texture", stone.texture],
@@ -688,19 +493,6 @@ function updateSignalGrid(signature) {
   ].map(([label, value]) => `
     <div><span>${label}</span><strong>${Math.round(value * 100)}%</strong></div>
   `).join("");
-}
-
-function renderQualityPanel(quality) {
-  if (!qualityPanel || !qualitySummary || !qualityBarFill || !qualityTips) return;
-
-  const score = quality?.score ?? 0;
-  const summary = quality?.label || "Waiting for scan";
-  const tips = quality?.warnings?.length ? quality.warnings : ["The image looks suitable for a first pass. Keep the stone centered for better results."];
-
-  qualitySummary.textContent = summary;
-  qualityBarFill.style.width = `${Math.max(8, score)}%`;
-  qualityBarFill.style.background = score >= 75 ? "linear-gradient(90deg, var(--accent), var(--sky))" : score >= 50 ? "linear-gradient(90deg, var(--gold), var(--accent))" : "linear-gradient(90deg, var(--danger), var(--accent-2))";
-  qualityTips.innerHTML = tips.map((tip) => `<li>${tip}</li>`).join("");
 }
 
 function renderTab(stone) {
@@ -817,7 +609,6 @@ resetButton.addEventListener("click", () => {
   resultCard.classList.add("hidden");
   scanStatus.textContent = "Standby";
   updateSignalGrid();
-  renderQualityPanel();
   [...analysisStrip.children].forEach((step) => step.classList.remove("active"));
   showPage("scanPage");
 });
@@ -851,4 +642,3 @@ document.querySelectorAll(".tab").forEach((button) => {
 
 renderSamples();
 updateSignalGrid();
-renderQualityPanel();

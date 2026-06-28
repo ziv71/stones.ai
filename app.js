@@ -202,6 +202,31 @@ const ML_LABEL_MAP = {
   limestone: "limestone",
   slate: "slate"
 };
+const ML_BACKGROUND_LABELS = new Set([
+  "sky",
+  "cloud",
+  "forest",
+  "tree",
+  "woodland",
+  "mountain",
+  "water",
+  "river",
+  "ocean",
+  "lake",
+  "beach",
+  "field",
+  "grass",
+  "sand",
+  "desert",
+  "ice",
+  "snow",
+  "person",
+  "face",
+  "hand",
+  "building",
+  "city",
+  "vehicle"
+]);
 let mobileNetModel = null;
 
 async function loadMobileNetModel() {
@@ -409,7 +434,12 @@ function analyzeImageSignature(src) {
           const sat = max === 0 ? 0 : (max - min) / max;
           const warm = clamp((r + 0.35 * g - b + 0.35) / 1.7);
           const isCenterRegion = x > size * 0.2 && x < size * 0.8 && y > size * 0.2 && y < size * 0.8;
-          const isForeground = isCenterRegion && sat > 0.08 && light > 0.06 && light < 0.95;
+          const nextIndex = (y * size + x + 1) * 4;
+          const rightLuma = x < size - 1 ? (pixels[nextIndex] / 255 * 0.2126 + pixels[nextIndex + 1] / 255 * 0.7152 + pixels[nextIndex + 2] / 255 * 0.0722) : light;
+          const downIndex = ((y + 1) * size + x) * 4;
+          const below = y < size - 1 ? (pixels[downIndex] / 255 * 0.2126 + pixels[downIndex + 1] / 255 * 0.7152 + pixels[downIndex + 2] / 255 * 0.0722) : light;
+          const localContrast = Math.max(Math.abs(light - rightLuma), Math.abs(light - below));
+          const isForeground = isCenterRegion && light > 0.06 && light < 0.95 && (sat > 0.06 || localContrast > 0.12 || Math.abs(light - 0.5) > 0.08);
 
           if (isForeground) {
             foregroundCount += 1;
@@ -420,13 +450,8 @@ function analyzeImageSignature(src) {
             contrastSum += Math.abs(light - 0.5);
           }
 
-          const nextIndex = (y * size + x + 1) * 4;
-          if (x < size - 1) edgeSum += Math.abs(light - (pixels[nextIndex] / 255 * 0.2126 + pixels[nextIndex + 1] / 255 * 0.7152 + pixels[nextIndex + 2] / 255 * 0.0722));
-          if (y < size - 1) {
-            const downIndex = ((y + 1) * size + x) * 4;
-            const below = pixels[downIndex] / 255 * 0.2126 + pixels[downIndex + 1] / 255 * 0.7152 + pixels[downIndex + 2] / 255 * 0.0722;
-            edgeSum += Math.abs(light - below);
-          }
+          if (x < size - 1) edgeSum += Math.abs(light - rightLuma);
+          if (y < size - 1) edgeSum += Math.abs(light - below);
         }
       }
 
@@ -443,8 +468,8 @@ function analyzeImageSignature(src) {
         edge: clamp(edgeSum / (total * 2) * 5)
       };
 
-      const quality = assessImageQuality(imageData, signature, foregroundCount / (size * size));
       const mlLabels = await predictImageLabels(image);
+      const quality = assessImageQuality(imageData, signature, foregroundCount / (size * size), mlLabels);
 
       resolve({ signature, quality, mlLabels });
     };
@@ -508,12 +533,38 @@ function findMlStoneMatch(labels) {
     slate: "slate",
     quartz: "marble",
     amethyst: "marble",
-    stone: null,
+    lava: "basalt",
+    basaltic: "basalt",
+    sand: "sandstone",
     rock: null,
+    stone: null,
     crystal: null,
     "volcanic rock": "basalt",
     "metamorphic rock": "slate",
-    "sedimentary rock": "sandstone"
+    "sedimentary rock": "sandstone",
+    sky: null,
+    cloud: null,
+    forest: null,
+    tree: null,
+    woodland: null,
+    mountain: null,
+    water: null,
+    river: null,
+    ocean: null,
+    lake: null,
+    beach: null,
+    field: null,
+    grass: null,
+    desert: null,
+    ice: null,
+    snow: null,
+    person: null,
+    face: null,
+    hand: null,
+    bird: null,
+    building: null,
+    city: null,
+    vehicle: null
   };
 
   const normalized = labels.flatMap((entry) => {
@@ -525,8 +576,13 @@ function findMlStoneMatch(labels) {
 
   for (const entry of normalized.sort((a, b) => b.probability - a.probability)) {
     const key = entry.label.replace(/[^a-z0-9 ]/g, "").trim();
-    if (synonyms[key] && ML_LABEL_MAP[synonyms[key]]) {
-      return { stone: stones.find((stone) => stone.id === synonyms[key]), probability: entry.probability };
+    if (!key) continue;
+    if (synonyms.hasOwnProperty(key)) {
+      const mapping = synonyms[key];
+      if (mapping && ML_LABEL_MAP[mapping]) {
+        return { stone: stones.find((stone) => stone.id === mapping), probability: entry.probability };
+      }
+      return null;
     }
     if (ML_LABEL_MAP[key]) {
       return { stone: stones.find((stone) => stone.id === key), probability: entry.probability };
@@ -541,7 +597,7 @@ function predictImageLabels(image) {
   return mobileNetModel.classify(image, 5).catch(() => []);
 }
 
-function assessImageQuality(imageData, signature, foregroundRatio = 0.5) {
+function assessImageQuality(imageData, signature, foregroundRatio = 0.5, mlLabels = []) {
   const size = Math.sqrt(imageData.data.length / 4);
   const pixels = imageData.data;
   let borderLuma = 0;
@@ -583,17 +639,21 @@ function assessImageQuality(imageData, signature, foregroundRatio = 0.5) {
   const centerAvg = centerCount ? centerLuma / centerCount : 0;
   const borderDifference = Math.abs(borderAvg - centerAvg);
   const sharpnessScore = clamp(sharpness / (size * size * 2) * 6);
-  const focusScore = clamp(foregroundRatio * 1.4);
-  const sizeScore = clamp(Math.min(size, 160) / 160);
+  const focusScore = clamp(foregroundRatio * 1.5);
+  const sizeScore = clamp(foregroundRatio * 1.1 + Math.min(size, 160) / 160 * 0.2);
   const contrastScore = signature.contrast;
   const brightnessScore = 1 - Math.abs(signature.brightness - 0.5) * 1.6;
-  const overall = clamp((sharpnessScore * 0.3) + (focusScore * 0.25) + (sizeScore * 0.2) + (contrastScore * 0.15) + (brightnessScore * 0.1));
+  const overall = clamp((sharpnessScore * 0.28) + (focusScore * 0.28) + (sizeScore * 0.2) + (contrastScore * 0.14) + (brightnessScore * 0.1));
+
+  const normalizedLabels = mlLabels.flatMap((entry) => entry.className.toLowerCase().split(/[,&]/g).map((part) => part.trim().replace(/[^a-z0-9 ]/g, "")));
+  const detectedBackground = normalizedLabels.find((label) => ML_BACKGROUND_LABELS.has(label));
 
   const warnings = [];
-  if (sizeScore < 0.55) warnings.push("The stone is too small in the frame. Crop closer to the object.");
+  if (detectedBackground) warnings.push(`Background contains ${detectedBackground}. Crop closer to the stone and avoid sky, trees, buildings or water.`);
+  if (foregroundRatio < 0.35) warnings.push("The stone is too small in the frame. Crop closer to the object.");
   if (sharpnessScore < 0.25) warnings.push("The image looks soft or blurred. Use a sharper focus.");
   if (focusScore < 0.5) warnings.push("The frame is dominated by background. Center the stone and reduce surrounding clutter.");
-  if (borderDifference < 0.04) warnings.push("The background is too uniform or low contrast. Use a cleaner backdrop.");
+  if (borderDifference < 0.04) warnings.push("Most of the image looks like background. Use a cleaner backdrop or place the stone on a neutral surface.");
   if (signature.brightness < 0.18) warnings.push("The scan is too dark. Add more light or avoid shadows.");
   if (signature.brightness > 0.88) warnings.push("The scan is too bright. Reduce glare and bright reflections.");
 

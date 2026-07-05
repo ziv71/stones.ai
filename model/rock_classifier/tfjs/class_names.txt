@@ -1,6 +1,6 @@
-granite
 basalt
+granite
+limestone
 marble
 sandstone
-limestone
 slate

@@ -3,7 +3,7 @@ import shutil
 import tempfile
 import unittest
 
-from import_dataset import import_dataset
+from tools.training.import_dataset import import_dataset
 
 
 class ImportDatasetTests(unittest.TestCase):

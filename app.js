@@ -29,16 +29,13 @@ const stones = [
       ["Human use", "People cut and polish it for buildings, art, and long-lasting surfaces."],
       ["Sustainable future", "Reused granite can avoid new quarry damage and keep material in circulation."]
     ],
-    svg: "granite"
-    ,
-    artwork: {
-      title: "Cape Ann Granite",
-      artist: "Edward Hopper",
-      year: "1928",
-      imageUrl: "https://upload.wikimedia.org/wikipedia/commons/a/a4/Cape_Ann_Granite%2C_by_Edward_Hopper.png",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:Cape_Ann_Granite,_by_Edward_Hopper.png",
-      caption: "Edward Hopper, 'Cape Ann Granite' (1928) — public domain image on Wikimedia Commons."
-    }
+    svg: "granite",
+    accentColor: "#a8b0b4",
+    softColor: "rgba(168, 176, 180, 0.14)",
+    glowColor: "rgba(176, 186, 190, 0.12)",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Granite_cliff_with_feldspar_crystals_in_Loddebo_2.jpg/500px-Granite_cliff_with_feldspar_crystals_in_Loddebo_2.jpg",
+    imageSourceUrl: "https://commons.wikimedia.org/wiki/File:Granite_cliff_with_feldspar_crystals_in_Loddebo_2.jpg",
+    imageCaption: "Granite cliff with feldspar crystals, Wikimedia Commons."
   },
   {
     id: "basalt",
@@ -70,16 +67,13 @@ const stones = [
       ["Weathering", "Rain and air slowly break the surface into mineral-rich soil."],
       ["Design reuse", "Basalt can become tiles, aggregate, sculpture, or landscape material."]
     ],
-    svg: "basalt"
-    ,
-    artwork: {
-      title: "Hadad (illustration)",
-      artist: "Jewish Encyclopedia (source)",
-      year: "c.1905",
-      imageUrl: "https://upload.wikimedia.org/wikipedia/commons/6/6b/Hadad.jpg",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:Hadad.jpg",
-      caption: "Public-domain illustration of a basalt statue (Hadad) from Wikimedia Commons."
-    }
+    svg: "basalt",
+    accentColor: "#7a838d",
+    softColor: "rgba(122, 131, 141, 0.16)",
+    glowColor: "rgba(128, 138, 148, 0.12)",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Basalt_Rock_Formation_-_geograph.org.uk_-_180882.jpg/500px-Basalt_Rock_Formation_-_geograph.org.uk_-_180882.jpg",
+    imageSourceUrl: "https://commons.wikimedia.org/wiki/File:Basalt_Rock_Formation_-_geograph.org.uk_-_180882.jpg",
+    imageCaption: "Basalt rock formation, Wikimedia Commons."
   },
   {
     id: "marble",
@@ -111,16 +105,13 @@ const stones = [
       ["Carving phase", "Artists and builders value the stone for its smooth workability."],
       ["Circular use", "Old marble can be recut, repaired, or transformed into mosaics."]
     ],
-    svg: "marble"
-    ,
-    artwork: {
-      title: "Marble sculpture @ MFA",
-      artist: "Thomas Oboe Lee (photo)",
-      year: "2010",
-      imageUrl: "https://upload.wikimedia.org/wikipedia/commons/3/34/Marble_sculpture_%40_MFA.jpg",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:Marble_sculpture_@_MFA.jpg",
-      caption: "Photograph of a marble sculpture from the Museum of Fine Arts (CC BY-SA 4.0)."
-    }
+    svg: "marble",
+    accentColor: "#d8dbd9",
+    softColor: "rgba(216, 219, 217, 0.14)",
+    glowColor: "rgba(232, 234, 233, 0.14)",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Statuarietto_White_Marble_%28Apuan_Marble_Formation%2C_Tertiary_metamorphism_of_Jurassic_limestones%3B_Carrara_region%2C_Italy%29_6_%2840899027645%29.jpg/500px-Statuarietto_White_Marble_%28Apuan_Marble_Formation%2C_Tertiary_metamorphism_of_Jurassic_limestones%3B_Carrara_region%2C_Italy%29_6_%2840899027645%29.jpg",
+    imageSourceUrl: "https://commons.wikimedia.org/wiki/File:Statuarietto_White_Marble_(Apuan_Marble_Formation,_Tertiary_metamorphism_of_Jurassic_limestones;_Carrara_region,_Italy)_6_(40899027645).jpg",
+    imageCaption: "White marble formation, Wikimedia Commons."
   },
   {
     id: "sandstone",
@@ -152,16 +143,13 @@ const stones = [
       ["Exposure", "Erosion reveals cliffs, arches, and striped rock faces."],
       ["Careful use", "Builders can use local sandstone while protecting fragile landforms."]
     ],
-    svg: "sandstone"
-    ,
-    artwork: {
-      title: "Rocky Landscape in the Elbe Sandstone Mountains",
-      artist: "Caspar David Friedrich",
-      year: "1822-1823",
-      imageUrl: "https://upload.wikimedia.org/wikipedia/commons/c/c1/Rocky_Landscape_in_the_Elbe_Sandstone_Mountains_-_Caspar_David_Friedrich_-_Google_Cultural_Institute.jpg",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:Rocky_Landscape_in_the_Elbe_Sandstone_Mountains_-_Caspar_David_Friedrich_-_Google_Cultural_Institute.jpg",
-      caption: "Caspar David Friedrich, landscape showing Elbe sandstone formations (public-domain reproduction)."
-    }
+    svg: "sandstone",
+    accentColor: "#ad8f7d",
+    softColor: "rgba(173, 143, 125, 0.14)",
+    glowColor: "rgba(200, 173, 148, 0.12)",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Aztec_Sandstone_-_Red_Rock_Canyon.jpg/500px-Aztec_Sandstone_-_Red_Rock_Canyon.jpg",
+    imageSourceUrl: "https://commons.wikimedia.org/wiki/File:Aztec_Sandstone_-_Red_Rock_Canyon.jpg",
+    imageCaption: "Aztec Sandstone, Wikimedia Commons."
   },
   {
     id: "limestone",
@@ -193,16 +181,13 @@ const stones = [
       ["Cave making", "Water dissolves paths through the rock and creates karst features."],
       ["Modern challenge", "Its role in cement makes careful material choices important."]
     ],
-    svg: "limestone"
-    ,
-    artwork: {
-      title: "Limestone Mountains of Sarawak, Borneo",
-      artist: "Marianne North",
-      year: "1876",
-      imageUrl: "https://upload.wikimedia.org/wikipedia/commons/f/fc/Marianne_North_%281830-1890%29_-_Limestone_Mountains_of_Sarawak%2C_Borneo_-_MN328_-_Marianne_North_Gallery.jpg",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:Marianne_North_(1830-1890)_-_Limestone_Mountains_of_Sarawak,_Borneo_-_MN328_-_Marianne_North_Gallery.jpg",
-      caption: "Marianne North, painting of limestone karst in Borneo (public-domain reproduction)."
-    }
+    svg: "limestone",
+    accentColor: "#c3beb3",
+    softColor: "rgba(195, 190, 179, 0.14)",
+    glowColor: "rgba(220, 216, 206, 0.12)",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Rock-cut_basin_forms.JPG/500px-Rock-cut_basin_forms.JPG",
+    imageSourceUrl: "https://commons.wikimedia.org/wiki/File:Rock-cut_basin_forms.JPG",
+    imageCaption: "Limestone rock basin, Wikimedia Commons."
   },
   {
     id: "slate",
@@ -234,16 +219,13 @@ const stones = [
       ["Split sheets", "Craftspeople separate it into thin durable layers."],
       ["Reuse", "Old tiles can be salvaged for roofs, gardens, and art projects."]
     ],
-    svg: "slate"
-    ,
-    artwork: {
-      title: "Slate Quarries",
-      artist: "John Crome",
-      year: "1802-1805",
-      imageUrl: "https://upload.wikimedia.org/wikipedia/commons/6/6e/John_Crome_%281768-1821%29_-_Slate_Quarries_-_NG1037_-_Tate.jpg",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:John_Crome_(1768-1821)_-_Slate_Quarries_-_NG1037_-_Tate.jpg",
-      caption: "John Crome, 'Slate Quarries' — public-domain painting showing slate landscapes."
-    }
+    svg: "slate",
+    accentColor: "#7f8790",
+    softColor: "rgba(127, 135, 144, 0.14)",
+    glowColor: "rgba(151, 159, 169, 0.12)",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/a/af/SlateUSGOV.jpg",
+    imageSourceUrl: "https://commons.wikimedia.org/wiki/File:SlateUSGOV.jpg",
+    imageCaption: "Slate rock, Wikimedia Commons."
   }
 ];
 
@@ -275,6 +257,9 @@ const sampleGrid = document.querySelector("#sampleGrid");
 const previewImage = document.querySelector("#previewImage");
 const emptyState = document.querySelector("#emptyState");
 const fileInput = document.querySelector("#fileInput");
+const pasteButton = document.querySelector("#pasteButton");
+const urlInput = document.querySelector("#urlInput");
+const urlButton = document.querySelector("#urlButton");
 const scanButton = document.querySelector("#scanButton");
 const scanFrame = document.querySelector("#scanFrame");
 const analysisStrip = document.querySelector("#analysisStrip");
@@ -299,34 +284,136 @@ let selectedImage = "";
 let activeTab = "about";
 let activePage = "scanPage";
 
-function showPage(pageId) {
+function showPage(pageId, options = { scroll: true }) {
   activePage = pageId;
   appPages.forEach((page) => page.classList.toggle("active", page.id === pageId));
   navButtons.forEach((button) => button.classList.toggle("active", button.dataset.page === pageId));
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  if (options.scroll) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 }
 
 function stoneSvg(type) {
-  const styles = {
-    granite: ["#7d7569", "#ead8b7", "#2f302e", "#d76f9f"],
-    basalt: ["#1b1b1c", "#57514b", "#050505", "#efc984"],
-    marble: ["#e9dfcf", "#b79f90", "#6e5f56", "#d76f9f"],
-    sandstone: ["#b27a4d", "#efc984", "#55352b", "#f3e4cf"],
-    limestone: ["#d7c8aa", "#fff1cf", "#766955", "#89b7a7"],
-    slate: ["#263035", "#71838a", "#101417", "#d76f9f"]
+  const stoneData = {
+    granite: {
+      base: "#8f8f8b",
+      mid: "#4f4d4a",
+      shadow: "#2f2f2d",
+      highlight: "#d7d7d5",
+      accent: "#c5c3bf",
+      specks: [
+        [52, 82, 7, "#1f1f1d", 0.86],
+        [132, 56, 6, "#c9c7c2", 0.72],
+        [204, 94, 5, "#7d7c79", 0.6],
+        [174, 60, 8, "#aeada9", 0.42]
+      ]
+    },
+    basalt: {
+      base: "#17191f",
+      mid: "#3d4148",
+      shadow: "#0b0d11",
+      highlight: "#8a8f98",
+      accent: "#5c6067",
+      specks: [
+        [76, 86, 5, "#8c9199", 0.32],
+        [108, 96, 6, "#5b5f66", 0.45],
+        [176, 116, 4, "#a1a5ae", 0.18]
+      ]
+    },
+    marble: {
+      base: "#eff0ee",
+      mid: "#c4c6c4",
+      shadow: "#9ea0a0",
+      highlight: "#fbfbfb",
+      accent: "#8d8f8d",
+      veining: "#7b7d7b",
+      specks: [
+        [92, 92, 4, "#f9f9f8", 0.75],
+        [152, 82, 5, "#bdbfbf", 0.4]
+      ]
+    },
+    sandstone: {
+      base: "#c9b8ad",
+      mid: "#9e9086",
+      shadow: "#6c5f58",
+      highlight: "#e9ddd7",
+      accent: "#b7a79f",
+      specks: [
+        [78, 86, 5, "#d3c7c0", 0.42],
+        [142, 76, 4, "#8c7f77", 0.34],
+        [188, 100, 5, "#f2e8df", 0.22]
+      ]
+    },
+    limestone: {
+      base: "#dcd8d1",
+      mid: "#b2afa7",
+      shadow: "#7f7c76",
+      highlight: "#f8f6f1",
+      accent: "#c1bdb7",
+      specks: [
+        [86, 94, 6, "#f5f2ee", 0.5],
+        [134, 82, 4, "#b8b4ad", 0.35],
+        [180, 102, 5, "#9f9b94", 0.28]
+      ]
+    },
+    slate: {
+      base: "#2b3038",
+      mid: "#525b67",
+      shadow: "#12161b",
+      highlight: "#9ba5ae",
+      accent: "#737d88",
+      specks: [
+        [94, 86, 4, "#4b535c", 0.48],
+        [150, 72, 5, "#6f7884", 0.38],
+        [202, 100, 3, "#a4acb5", 0.24]
+      ]
+    }
+  }[type] || stoneData.granite;
+
+  const detailShapes = stoneData.specks.map(([cx, cy, r, fill, o]) => `
+      <ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="${Math.max(3, r - 2)}" fill="${fill}" fill-opacity="${o}" />
+    `).join("");
+
+  const pattern = {
+    granite: `<path d="M36 72q42-52 104-42t84 54q18 26 10 60t-82 40q-68 20-114-18t-2-94Z" fill="${stoneData.base}"/>
+      <path d="M60 88c18-16 76-38 112-16" stroke="${stoneData.mid}" stroke-width="14" stroke-linecap="round" opacity="0.35"/>
+      <path d="M110 54c16 14 48 18 76 6" stroke="${stoneData.shadow}" stroke-width="10" stroke-linecap="round" opacity="0.28"/>`,
+    basalt: `<path d="M30 62q18-46 88-46t102 36q26 38 18 70t-84 40q-64 12-128-28t0-72Z" fill="${stoneData.base}"/>
+      <path d="M60 98c14-14 74-32 116-10" stroke="${stoneData.highlight}" stroke-width="12" stroke-linecap="round" opacity="0.22"/>
+      <path d="M88 58c18 20 54 24 82 12" stroke="${stoneData.accent}" stroke-width="6" stroke-linecap="round" opacity="0.24"/>`,
+    marble: `<path d="M34 66q40-50 96-38t90 50q16 30 4 58t-82 34q-68 16-108-14t0-90Z" fill="${stoneData.base}"/>
+      <path d="M56 82c28-20 62-22 94-2s30 54 8 70" stroke="${stoneData.veining}" stroke-width="10" stroke-linecap="round" opacity="0.42"/>
+      <path d="M48 100c30-12 70-20 104 6" stroke="${stoneData.mid}" stroke-width="8" stroke-linecap="round" opacity="0.3"/>`,
+    sandstone: `<path d="M24 70q28-28 90-34t100 32q24 36 16 64t-80 36q-66 18-126-16t0-62Z" fill="${stoneData.base}"/>
+      <path d="M34 82h226" stroke="${stoneData.mid}" stroke-width="16" opacity="0.24"/>
+      <path d="M38 104h216" stroke="${stoneData.highlight}" stroke-width="10" opacity="0.18"/>`,
+    limestone: `<path d="M28 74q34-32 92-34t98 36q20 30 10 62t-80 32q-66 18-120-12t0-84Z" fill="${stoneData.base}"/>
+      <path d="M50 98c16-16 62-24 100-8" stroke="${stoneData.mid}" stroke-width="10" stroke-linecap="round" opacity="0.28"/>
+      <path d="M72 76c22-12 52-14 78 0" stroke="${stoneData.shadow}" stroke-width="6" stroke-linecap="round" opacity="0.2"/>`,
+    slate: `<path d="M30 68q18-38 96-38t106 38q28 34 16 70t-80 34q-66 12-122-22t-16-82Z" fill="${stoneData.base}"/>
+      <path d="M42 96h216" stroke="${stoneData.mid}" stroke-width="14" opacity="0.32"/>
+      <path d="M40 116h216" stroke="${stoneData.highlight}" stroke-width="8" opacity="0.18"/>`
   }[type];
 
   return `
-    <svg viewBox="0 0 300 150" role="img" aria-label="${type} stone illustration">
-      <rect width="300" height="150" fill="#090707"/>
-      <path d="M0 35c42 18 86 18 132 0s91-18 136 0 66 17 92-3v118H0Z" fill="#15100f" opacity=".8"/>
-      <path d="M47 82c3-37 45-62 92-60 48 2 91 25 111 58 17 28 2 55-37 66-49 14-128 5-157-20-11-10-14-25-9-44Z" fill="${styles[0]}"/>
-      <path d="M77 72c43-25 105-24 151 3M67 105c50 25 108 31 174 12" stroke="${styles[1]}" stroke-width="9" stroke-linecap="round" opacity=".62"/>
-      <path d="M112 40c-13 21-18 43-11 65M181 36c23 21 33 48 31 82" stroke="${styles[2]}" stroke-width="7" stroke-linecap="round" opacity=".46"/>
-      <path d="M61 88c38 8 74 5 108-9 38-16 75-14 111 5" stroke="${styles[3]}" stroke-width="4" stroke-linecap="round" opacity=".38"/>
-      <circle cx="96" cy="93" r="5" fill="${styles[2]}" opacity=".7"/>
-      <circle cx="154" cy="61" r="4" fill="${styles[1]}" opacity=".8"/>
-      <circle cx="207" cy="96" r="6" fill="${styles[2]}" opacity=".5"/>
+    <svg viewBox="0 0 300 150" role="img" aria-label="${type} stone illustration" xmlns="http://www.w3.org/2000/svg">
+      <rect width="300" height="150" fill="#121419" rx="18"/>
+      <defs>
+        <radialGradient id="stoneGlow" cx="35%" cy="30%" r="85%">
+          <stop offset="0%" stop-color="${stoneData.highlight}" stop-opacity="0.5" />
+          <stop offset="55%" stop-color="${stoneData.base}" stop-opacity="0.95" />
+          <stop offset="100%" stop-color="${stoneData.shadow}" stop-opacity="1" />
+        </radialGradient>
+        <linearGradient id="shineEdge" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="rgba(255,255,255,0.22)" />
+          <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+        </linearGradient>
+      </defs>
+      ${pattern}
+      ${detailShapes}
+      <path d="M40 70q42-52 108-44t86 54q14 28 6 62t-72 40q-68 18-114-16t-14-96Z" fill="url(#stoneGlow)" opacity="0.24"/>
+      <path d="M44 70c18-38 70-48 118-26s50 62 24 80c-28 20-86 18-128-16-12-12-18-24-14-38Z" fill="url(#shineEdge)" opacity="0.32"/>
+      <path d="M52 108c28-22 90-34 126-8" stroke="${stoneData.accent}" stroke-width="4" stroke-linecap="round" opacity="0.2"/>
     </svg>`;
 }
 
@@ -336,8 +423,11 @@ function svgDataUrl(type) {
 
 function renderSamples() {
   sampleGrid.innerHTML = stones.map((stone) => `
-    <button class="sample-card ${stone.id === selectedStone.id ? "selected" : ""}" type="button" data-id="${stone.id}">
-      <div class="stone-art">${stoneSvg(stone.svg)}</div>
+    <button class="sample-card ${stone.id === selectedStone.id ? "selected" : ""}" type="button" data-id="${stone.id}"
+      style="--card-border-color:${stone.accentColor}; --card-soft-color:${stone.softColor}; --card-glow-color:${stone.glowColor};">
+      <div class="stone-art">
+        ${stone.imageUrl ? `<img src="${stone.imageUrl}" alt="Photo of ${stone.name}" loading="lazy" />` : stoneSvg(stone.svg)}
+      </div>
       <strong>${stone.name}</strong>
       <p>${stone.category} - ${stone.texture}</p>
     </button>
@@ -346,7 +436,7 @@ function renderSamples() {
 
 function selectStone(id) {
   selectedStone = { ...(stones.find((stone) => stone.id === id) || stones[0]), isUncertain: false };
-  selectedImage = svgDataUrl(selectedStone.svg);
+  selectedImage = selectedStone.imageUrl || svgDataUrl(selectedStone.svg);
   previewImage.src = selectedImage;
   previewImage.style.display = "block";
   emptyState.style.display = "none";
@@ -359,31 +449,97 @@ function selectStone(id) {
 function chooseUpload(file) {
   if (!file || !file.type.startsWith("image/")) return;
   const reader = new FileReader();
-  reader.onload = () => {
-    selectedImage = reader.result;
-    previewImage.src = selectedImage;
-    previewImage.style.display = "block";
-    emptyState.style.display = "none";
-    analyzeImageSignature(selectedImage).then(({ signature, quality, mlLabels }) => {
-      const match = matchStone(signature, mlLabels);
-      selectedStone = match.confidence >= MIN_RELIABLE_CONFIDENCE && quality.score >= 50
-        ? {
-            ...match.stone,
-            confidence: match.confidence,
-            matchedSignature: signature,
-            secondChoice: match.secondChoice,
-            mlLabels,
-            quality,
-            isUncertain: false
-          }
-        : createUncertainResult(match, signature, quality, mlLabels);
-      updateSignalGrid(signature);
-      renderQualityPanel(quality);
-      scanStatus.textContent = quality.label;
-      renderSamples();
-    });
-  };
+  reader.onload = () => loadScannedImage(reader.result);
   reader.readAsDataURL(file);
+}
+
+function loadScannedImage(src) {
+  if (!src) return;
+  selectedImage = src;
+  previewImage.src = selectedImage;
+  previewImage.style.display = "block";
+  emptyState.style.display = "none";
+  analyzeImageSignature(selectedImage).then(({ signature, quality, mlLabels }) => {
+    const match = matchStone(signature, mlLabels);
+    selectedStone = match.confidence >= MIN_RELIABLE_CONFIDENCE && quality.score >= 50
+      ? {
+          ...match.stone,
+          confidence: match.confidence,
+          matchedSignature: signature,
+          secondChoice: match.secondChoice,
+          mlLabels,
+          quality,
+          isUncertain: false
+        }
+      : createUncertainResult(match, signature, quality, mlLabels);
+    updateSignalGrid(signature);
+    renderQualityPanel(quality);
+    scanStatus.textContent = quality.label;
+    renderSamples();
+  });
+}
+
+function loadImageUrl(url) {
+  const value = String(url || "").trim();
+  if (!value) {
+    scanStatus.textContent = "Enter a valid image URL or paste a stone photo.";
+    return;
+  }
+  let source = value;
+  if (!/^https?:\/\//i.test(source)) {
+    source = `https://${source}`;
+  }
+  scanStatus.textContent = "Loading image from URL...";
+  urlInput.value = "";
+  loadScannedImage(source);
+}
+
+function handleClipboardPaste(event) {
+  const items = event.clipboardData?.items;
+  if (items) {
+    for (const item of items) {
+      if (item.type.startsWith("image/")) {
+        const file = item.getAsFile();
+        if (file) {
+          chooseUpload(file);
+          return;
+        }
+      }
+    }
+  }
+  const text = event.clipboardData?.getData("text/plain")?.trim();
+  if (text) {
+    if (/^https?:\/\//i.test(text) || /\.(png|jpe?g|webp|gif|bmp)(\?|$)/i.test(text)) {
+      loadImageUrl(text);
+      return;
+    }
+  }
+  scanStatus.textContent = "Clipboard did not contain a valid stone image.";
+}
+
+function requestPasteImage() {
+  if (navigator.clipboard && navigator.clipboard.read) {
+    navigator.clipboard.read().then((items) => {
+      for (const item of items) {
+        for (const type of item.types) {
+          if (type.startsWith("image/")) {
+            return item.getType(type).then((blob) => {
+              chooseUpload(new File([blob], "clipboard-image", { type: blob.type }));
+            });
+          }
+        }
+      }
+      return navigator.clipboard.readText();
+    }).then((text) => {
+      if (typeof text === "string" && text.trim()) {
+        loadImageUrl(text.trim());
+      }
+    }).catch(() => {
+      scanStatus.textContent = "Clipboard access blocked. Try Ctrl+V or paste a URL instead.";
+    });
+  } else {
+    scanStatus.textContent = "Press Ctrl+V with an image or paste a URL to load a stone.";
+  }
 }
 
 function createUncertainResult(match, signature, quality, mlLabels = []) {
@@ -692,7 +848,8 @@ function scanStone() {
     activeTab = "about";
     scanStatus.textContent = selectedStone.isUncertain ? "Needs clearer scan" : "Match locked";
     renderResult(selectedStone, selectedImage);
-    showPage("resultsPage");
+    showPage("scanPage", { scroll: false });
+    document.querySelector(".results-panel").scrollIntoView({ behavior: "smooth", block: "start" });
   }, 1850);
 }
 
@@ -705,12 +862,20 @@ function renderResult(stone) {
   document.querySelector("#stoneName").textContent = stone.name;
   document.querySelector("#stoneCategory").textContent = stone.category;
   document.querySelector("#confidenceValue").textContent = `${stone.confidence}%`;
-  document.querySelector(".confidence-meter").style.setProperty("--score", `${stone.confidence}%`);
+  const meterEl = document.querySelector(".confidence-meter");
+  if (meterEl) {
+    meterEl.style.setProperty("--score", `${stone.confidence}%`);
+    meterEl.setAttribute("aria-valuenow", String(Math.round(stone.confidence)));
+  }
   if (qualityNotice) {
     const qualityText = stone.quality?.label || "Image readiness is still being evaluated.";
     qualityNotice.textContent = stone.isUncertain ? `Quality check: ${qualityText}` : `Quality check: ${qualityText}`;
   }
-  resultStoneArt.innerHTML = stone.isUncertain ? stoneSvg((stone.closestStone || stones[0]).svg) : stoneSvg(stone.svg);
+  resultStoneArt.innerHTML = selectedImage
+    ? `<img src="${selectedImage}" alt="Photo of ${stone.name}" />`
+    : stone.imageUrl
+      ? `<img src="${stone.imageUrl}" alt="Photo of ${stone.name}" />`
+      : stoneSvg(stone.svg);
   document.querySelector("#quickFacts").innerHTML = [
     ["Texture", stone.texture],
     ["Colors", stone.colors],
@@ -873,6 +1038,9 @@ sampleGrid.addEventListener("click", (event) => {
 });
 
 fileInput.addEventListener("change", (event) => chooseUpload(event.target.files[0]));
+pasteButton.addEventListener("click", requestPasteImage);
+urlButton.addEventListener("click", () => loadImageUrl(urlInput.value));
+window.addEventListener("paste", handleClipboardPaste);
 scanButton.addEventListener("click", scanStone);
 resetButton.addEventListener("click", () => {
   selectedImage = "";
@@ -916,6 +1084,24 @@ document.querySelectorAll(".tab").forEach((button) => {
   });
 });
 
+function revealProjectCards() {
+  const cards = document.querySelectorAll("#projectPage .project-card, #projectPage .project-hero");
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("in-view");
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.25 }
+  );
+
+  cards.forEach((card) => observer.observe(card));
+}
+
+revealProjectCards();
 renderSamples();
 updateSignalGrid();
 renderQualityPanel();

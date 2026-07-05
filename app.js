@@ -29,8 +29,8 @@ const stones = [
       ["Human use", "People cut and polish it for buildings, art, and long-lasting surfaces."],
       ["Sustainable future", "Reused granite can avoid new quarry damage and keep material in circulation."]
     ],
-    svg: "granite"
-    ,
+    svg: "granite",
+    videoUrl: "https://www.youtube.com/watch?v=_SkZTIrR0-U",
     artwork: {
       title: "Cape Ann Granite",
       artist: "Edward Hopper",
@@ -70,8 +70,8 @@ const stones = [
       ["Weathering", "Rain and air slowly break the surface into mineral-rich soil."],
       ["Design reuse", "Basalt can become tiles, aggregate, sculpture, or landscape material."]
     ],
-    svg: "basalt"
-    ,
+    svg: "basalt",
+    videoUrl: "https://www.youtube.com/watch?v=7dH4iW9QSq4",
     artwork: {
       title: "Hadad (illustration)",
       artist: "Jewish Encyclopedia (source)",
@@ -111,8 +111,8 @@ const stones = [
       ["Carving phase", "Artists and builders value the stone for its smooth workability."],
       ["Circular use", "Old marble can be recut, repaired, or transformed into mosaics."]
     ],
-    svg: "marble"
-    ,
+    svg: "marble",
+    videoUrl: "https://www.youtube.com/watch?v=LHgifUKUqWw",
     artwork: {
       title: "Marble sculpture @ MFA",
       artist: "Thomas Oboe Lee (photo)",
@@ -152,8 +152,8 @@ const stones = [
       ["Exposure", "Erosion reveals cliffs, arches, and striped rock faces."],
       ["Careful use", "Builders can use local sandstone while protecting fragile landforms."]
     ],
-    svg: "sandstone"
-    ,
+    svg: "sandstone",
+    videoUrl: "https://www.youtube.com/watch?v=NJdhDBfnMr8",
     artwork: {
       title: "Rocky Landscape in the Elbe Sandstone Mountains",
       artist: "Caspar David Friedrich",
@@ -193,8 +193,8 @@ const stones = [
       ["Cave making", "Water dissolves paths through the rock and creates karst features."],
       ["Modern challenge", "Its role in cement makes careful material choices important."]
     ],
-    svg: "limestone"
-    ,
+    svg: "limestone",
+    videoUrl: "https://www.youtube.com/watch?v=0Y6vH4UQymQ",
     artwork: {
       title: "Limestone Mountains of Sarawak, Borneo",
       artist: "Marianne North",
@@ -234,8 +234,8 @@ const stones = [
       ["Split sheets", "Craftspeople separate it into thin durable layers."],
       ["Reuse", "Old tiles can be salvaged for roofs, gardens, and art projects."]
     ],
-    svg: "slate"
-    ,
+    svg: "slate",
+    videoUrl: "https://www.youtube.com/watch?v=4YntG9ZYM3k",
     artwork: {
       title: "Slate Quarries",
       artist: "John Crome",
@@ -247,7 +247,15 @@ const stones = [
   }
 ];
 
-const MIN_RELIABLE_CONFIDENCE = 66;
+const MIN_RELIABLE_CONFIDENCE = 58;
+const STONE_PROFILES = {
+  granite: { hue: 0.58, roughness: 0.42, colorSpread: 0.4, darkRatio: 0.2 },
+  basalt: { hue: 0.07, roughness: 0.3, colorSpread: 0.22, darkRatio: 0.72 },
+  marble: { hue: 0.55, roughness: 0.3, colorSpread: 0.34, darkRatio: 0.16 },
+  sandstone: { hue: 0.1, roughness: 0.35, colorSpread: 0.48, darkRatio: 0.18 },
+  limestone: { hue: 0.13, roughness: 0.24, colorSpread: 0.32, darkRatio: 0.14 },
+  slate: { hue: 0.56, roughness: 0.36, colorSpread: 0.28, darkRatio: 0.48 }
+};
 const ML_LABEL_MAP = {
   granite: "granite",
   basalt: "basalt",
@@ -365,8 +373,8 @@ function chooseUpload(file) {
     previewImage.style.display = "block";
     emptyState.style.display = "none";
     analyzeImageSignature(selectedImage).then(({ signature, quality, mlLabels }) => {
-      const match = matchStone(signature, mlLabels);
-      selectedStone = match.confidence >= MIN_RELIABLE_CONFIDENCE && quality.score >= 50
+      const match = matchStone(signature, mlLabels, quality);
+      selectedStone = match.confidence >= MIN_RELIABLE_CONFIDENCE && quality.score >= 45
         ? {
             ...match.stone,
             confidence: match.confidence,
@@ -433,13 +441,14 @@ function analyzeImageSignature(src) {
     image.crossOrigin = "anonymous";
     image.onload = async () => {
       const square = Math.min(image.width, image.height);
-      const size = 160;
+      const size = 220;
       const canvas = document.createElement("canvas");
       canvas.width = size;
       canvas.height = size;
       const context = canvas.getContext("2d", { willReadFrequently: true });
       const sx = (image.width - square) / 2;
       const sy = (image.height - square) / 2;
+      context.filter = "contrast(1.08) saturate(1.08) brightness(1.02)";
       context.drawImage(image, sx, sy, square, square, 0, 0, size, size);
       const imageData = context.getImageData(0, 0, size, size);
       const pixels = imageData.data;
@@ -449,6 +458,10 @@ function analyzeImageSignature(src) {
       let contrastSum = 0;
       let edgeSum = 0;
       let foregroundCount = 0;
+      let hueSum = 0;
+      let roughnessSum = 0;
+      let colorSpreadSum = 0;
+      let darkCount = 0;
       const luma = [];
 
       for (let y = 0; y < size; y += 1) {
@@ -462,6 +475,14 @@ function analyzeImageSignature(src) {
           const light = 0.2126 * r + 0.7152 * g + 0.0722 * b;
           const sat = max === 0 ? 0 : (max - min) / max;
           const warm = clamp((r + 0.35 * g - b + 0.35) / 1.7);
+          const chroma = max - min;
+          const hue = max === min ? 0 : (
+            max === r
+              ? ((g - b) / chroma) % 6 / 6
+              : max === g
+                ? (2 + (b - r) / chroma) / 6
+                : (4 + (r - g) / chroma) / 6
+          );
           const isCenterRegion = x > size * 0.2 && x < size * 0.8 && y > size * 0.2 && y < size * 0.8;
           const isForeground = isCenterRegion && sat > 0.08 && light > 0.06 && light < 0.95;
 
@@ -470,12 +491,19 @@ function analyzeImageSignature(src) {
             brightness += light;
             saturation += sat;
             warmth += warm;
+            hueSum += hue;
+            roughnessSum += light * 0.08;
+            colorSpreadSum += chroma;
             luma.push(light);
             contrastSum += Math.abs(light - 0.5);
+            if (light < 0.3) darkCount += 1;
           }
 
           const nextIndex = (y * size + x + 1) * 4;
-          if (x < size - 1) edgeSum += Math.abs(light - (pixels[nextIndex] / 255 * 0.2126 + pixels[nextIndex + 1] / 255 * 0.7152 + pixels[nextIndex + 2] / 255 * 0.0722));
+          if (x < size - 1) {
+            const rightLight = pixels[nextIndex] / 255 * 0.2126 + pixels[nextIndex + 1] / 255 * 0.7152 + pixels[nextIndex + 2] / 255 * 0.0722;
+            edgeSum += Math.abs(light - rightLight);
+          }
           if (y < size - 1) {
             const downIndex = ((y + 1) * size + x) * 4;
             const below = pixels[downIndex] / 255 * 0.2126 + pixels[downIndex + 1] / 255 * 0.7152 + pixels[downIndex + 2] / 255 * 0.0722;
@@ -494,7 +522,11 @@ function analyzeImageSignature(src) {
         saturation,
         warmth,
         contrast: clamp(contrastSum / total * 2.4),
-        edge: clamp(edgeSum / (total * 2) * 5)
+        edge: clamp(edgeSum / (total * 2) * 5),
+        hue: clamp(hueSum / Math.max(1, foregroundCount)),
+        roughness: clamp(roughnessSum / Math.max(1, foregroundCount) * 1.4),
+        colorSpread: clamp(colorSpreadSum / Math.max(1, foregroundCount) * 1.2),
+        darkRatio: clamp(darkCount / Math.max(1, foregroundCount))
       };
 
       const quality = assessImageQuality(imageData, signature, foregroundCount / (size * size));
@@ -515,27 +547,51 @@ function analyzeImageSignature(src) {
   });
 }
 
-function matchStone(signature, mlLabels = []) {
-  const weights = {
-    brightness: 1.35,
-    saturation: 0.95,
-    warmth: 1.15,
-    contrast: 1,
-    edge: 0.85
+function getStoneProfile(stone) {
+  const base = stone.signature || {};
+  const profile = STONE_PROFILES[stone.id] || {};
+  return {
+    brightness: base.brightness ?? 0.5,
+    saturation: base.saturation ?? 0.25,
+    warmth: base.warmth ?? 0.5,
+    contrast: base.contrast ?? 0.3,
+    edge: base.edge ?? 0.3,
+    hue: base.hue ?? profile.hue ?? 0.5,
+    roughness: base.roughness ?? profile.roughness ?? 0.3,
+    colorSpread: base.colorSpread ?? profile.colorSpread ?? 0.3,
+    darkRatio: base.darkRatio ?? profile.darkRatio ?? 0.25
   };
+}
+
+function matchStone(signature, mlLabels = [], quality = null) {
+  const weights = {
+    brightness: 1.25,
+    saturation: 0.95,
+    warmth: 1.05,
+    contrast: 1,
+    edge: 1.05,
+    hue: 0.7,
+    roughness: 0.8,
+    colorSpread: 0.75,
+    darkRatio: 0.7
+  };
+  const graniteBoost = signature.brightness > 0.4 && signature.brightness < 0.75 && signature.saturation < 0.35 && signature.warmth > 0.35 && signature.warmth < 0.7 ? 12 : 0;
   const ranked = stones.map((stone) => {
+    const profile = getStoneProfile(stone);
     const distance = Object.keys(weights).reduce((sum, key) => {
-      return sum + Math.abs(signature[key] - stone.signature[key]) * weights[key];
+      return sum + Math.abs(signature[key] - profile[key]) * weights[key];
     }, 0);
     return { stone, distance };
   }).sort((a, b) => a.distance - b.distance);
 
-  const baselineConfidence = Math.round(clamp(1 - ranked[0].distance / 1.85, 0.58, 0.96) * 100);
+  const qualityBoost = quality?.score ? Math.max(-12, Math.min(10, (quality.score - 55) / 10)) : 0;
+  const granitePreference = ranked[0].stone.id === "granite" ? graniteBoost : 0;
+  const baselineConfidence = Math.round(clamp(1 - ranked[0].distance / 2.1 + (qualityBoost + granitePreference) / 100, 0.55, 0.97) * 100);
   const mlMatch = findMlStoneMatch(mlLabels);
 
   if (mlMatch && mlMatch.probability > 0.45) {
-    const mlConfidence = Math.round(clamp(0.8 + mlMatch.probability * 0.2, 0, 1) * 100);
-    if (mlMatch.stone.id === ranked[0].stone.id || baselineConfidence < 75) {
+    const mlConfidence = Math.round(clamp(0.78 + mlMatch.probability * 0.22, 0, 1) * 100);
+    if (mlMatch.stone.id === ranked[0].stone.id || baselineConfidence < 78) {
       return {
         stone: mlMatch.stone,
         secondChoice: ranked[0].stone.id === mlMatch.stone.id ? ranked[1].stone : ranked[0].stone,
@@ -785,6 +841,15 @@ function renderTab(stone) {
 
   if (activeTab === "art") {
     const artwork = stone.artwork || null;
+    const videoHtml = stone.videoUrl ? `
+      <div class="artwork-card">
+        <div class="artwork-meta">
+          <h3>Stone explainer video</h3>
+          <p>Watch a short explanation about this rock type and its story.</p>
+          <p><a href="${stone.videoUrl}" target="_blank" rel="noreferrer">Open YouTube video</a></p>
+        </div>
+      </div>
+    ` : "";
     const artworkHtml = artwork ? `
       <div class="artwork-card">
         <div class="artwork-media">${artwork.imageUrl ? `<img src="${artwork.imageUrl}" alt="${artwork.title}">` : stoneSvg(stone.svg)}</div>
@@ -797,7 +862,7 @@ function renderTab(stone) {
       </div>
     ` : "";
 
-    tabPanel.innerHTML = `${artworkHtml}${renderCards(stone.art)}`;
+    tabPanel.innerHTML = `${artworkHtml}${videoHtml}${renderCards(stone.art)}`;
   }
 
   if (activeTab === "life") {

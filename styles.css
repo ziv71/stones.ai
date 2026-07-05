@@ -1012,8 +1012,7 @@ h3 {
 
 .quick-facts,
 .tabs,
-.tab-panel,
-.crystal-cta {
+.tab-panel {
   grid-column: 2;
 }
 
@@ -1113,33 +1112,6 @@ h3 {
 
 .tab-panel {
   min-height: 310px;
-}
-
-.crystal-cta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  min-height: 82px;
-  padding: 18px;
-  border: 1px solid var(--line-strong);
-  color: var(--text);
-  text-decoration: none;
-  background:
-    linear-gradient(135deg, rgba(239, 201, 132, 0.18), rgba(215, 111, 159, 0.14)),
-    linear-gradient(32deg, transparent 0 58%, rgba(243, 228, 207, 0.12) 58% 58.4%, transparent 58.4%),
-    var(--panel-soft);
-  clip-path: polygon(3% 0, 97% 8%, 100% 72%, 86% 100%, 0 88%);
-}
-
-.crystal-cta span {
-  color: var(--muted);
-  font-weight: 800;
-}
-
-.crystal-cta strong {
-  color: var(--accent);
-  font-size: 1.08rem;
 }
 
 .eco-score {
@@ -1359,11 +1331,6 @@ h3 {
   .tabs,
   .signal-grid {
     grid-template-columns: 1fr;
-  }
-
-  .crystal-cta {
-    align-items: flex-start;
-    flex-direction: column;
   }
 
   .scan-readout {

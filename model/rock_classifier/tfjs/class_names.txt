@@ -1,0 +1,6 @@
+granite
+basalt
+marble
+sandstone
+limestone
+slate

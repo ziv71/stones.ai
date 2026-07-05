@@ -25,7 +25,7 @@
           <a class="nav-button nav-link" href="crystal-machine.html">Crystal Machine</a>
         </nav>
         <div class="top-actions">
-          <span class="system-pill">Local visual model</span>
+          <span class="system-pill">Stronger visual model</span>
           <button class="ghost-button" id="resetButton" type="button" title="Start over">Reset</button>
         </div>
       </header>
@@ -141,6 +141,15 @@
                 <strong id="confidenceValue">94%</strong>
                 <span>match</span>
               </div>
+            </div>
+
+            <div class="confidence-panel" id="confidencePanel" aria-live="polite">
+              <div class="confidence-panel-head">
+                <span class="confidence-badge" id="confidenceBadge">Confident</span>
+                <strong id="confidenceStatus">Likely match</strong>
+              </div>
+              <p id="confidenceExplanation">The scanner found strong surface cues and a clear texture pattern.</p>
+              <ul class="candidate-list" id="topCandidatesList"></ul>
               <p class="quality-notice" id="qualityNotice"></p>
             </div>
 

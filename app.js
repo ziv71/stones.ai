@@ -193,7 +193,9 @@ const stones = [
   }
 ];
 
-const MIN_RELIABLE_CONFIDENCE = 66;
+const MIN_RELIABLE_CONFIDENCE = 58;
+const MIN_TOP1_PROBABILITY = 0.42;
+const MIN_TOP1_MARGIN = 0.06;
 const ML_LABEL_MAP = {
   granite: "granite",
   basalt: "basalt",
@@ -227,7 +229,21 @@ const ML_BACKGROUND_LABELS = new Set([
   "city",
   "vehicle"
 ]);
+
+function getQualityModifier(quality = null) {
+  if (!quality) return 1;
+  const score = quality.score ?? 0;
+  if (score >= 80) return 1;
+  if (score >= 60) return 0.96;
+  if (score >= 45) return 0.9;
+  if (score >= 30) return 0.8;
+  return 0.72;
+}
+
 let mobileNetModel = null;
+let stoneClassifierModel = null;
+let stoneClassifierLabels = [];
+let activeClassifierName = "heuristic";
 
 async function loadMobileNetModel() {
   if (typeof mobilenet === "undefined") return;
@@ -240,7 +256,35 @@ async function loadMobileNetModel() {
   }
 }
 
-loadMobileNetModel();
+async function loadStoneClassifierModel() {
+  if (typeof tf === "undefined") return;
+  try {
+    const modelUrl = new URL("./model/rock_classifier/tfjs/model.json", window.location.href).href;
+    const labelsUrl = new URL("./model/rock_classifier/tfjs/class_names.txt", window.location.href).href;
+    const modelResponse = await fetch(modelUrl);
+    if (!modelResponse.ok) {
+      throw new Error(`Model metadata not found: ${modelResponse.status}`);
+    }
+    stoneClassifierModel = await tf.loadGraphModel(modelUrl);
+    const response = await fetch(labelsUrl);
+    const labelText = await response.text();
+    stoneClassifierLabels = labelText.split(/\r?\n/).map((label) => label.trim()).filter(Boolean);
+    activeClassifierName = stoneClassifierLabels.length ? "custom" : "heuristic";
+    console.log("Loaded stronger stone classifier", stoneClassifierLabels);
+  } catch (error) {
+    console.warn("No stronger local stone classifier found, using fallback", error);
+    stoneClassifierModel = null;
+    stoneClassifierLabels = [];
+    activeClassifierName = "fallback";
+  }
+}
+
+async function initializeModelStack() {
+  loadMobileNetModel();
+  await loadStoneClassifierModel();
+}
+
+initializeModelStack();
 
 const sampleGrid = document.querySelector("#sampleGrid");
 const previewImage = document.querySelector("#previewImage");
@@ -261,6 +305,10 @@ const qualitySummary = document.querySelector("#qualitySummary");
 const qualityBarFill = document.querySelector("#qualityBarFill");
 const qualityTips = document.querySelector("#qualityTips");
 const qualityNotice = document.querySelector("#qualityNotice");
+const confidenceBadge = document.querySelector("#confidenceBadge");
+const confidenceStatus = document.querySelector("#confidenceStatus");
+const confidenceExplanation = document.querySelector("#confidenceExplanation");
+const topCandidatesList = document.querySelector("#topCandidatesList");
 const resultStoneArt = document.querySelector("#resultStoneArt");
 const navButtons = document.querySelectorAll(".nav-button");
 const appPages = document.querySelectorAll(".app-page");
@@ -336,16 +384,23 @@ function chooseUpload(file) {
     previewImage.style.display = "block";
     emptyState.style.display = "none";
     analyzeImageSignature(selectedImage).then(({ signature, quality, mlLabels }) => {
-      const match = matchStone(signature, mlLabels);
-      selectedStone = match.confidence >= MIN_RELIABLE_CONFIDENCE && quality.score >= 50
+      const match = matchStone(signature, mlLabels, quality);
+      const qualityModifier = getQualityModifier(quality);
+      const adjustedConfidence = Math.max(24, Math.min(95, Math.round(match.confidence * qualityModifier)));
+      const fallbackStone = stones.find((stone) => stone.id === match.topCandidates?.[0]?.id) || match.secondChoice || stones[0];
+      const shouldShowPrediction = Boolean(match.topCandidates?.length);
+      selectedStone = shouldShowPrediction
         ? {
-            ...match.stone,
-            confidence: match.confidence,
+            ...(match.stone || fallbackStone),
+            confidence: adjustedConfidence,
             matchedSignature: signature,
             secondChoice: match.secondChoice,
             mlLabels,
             quality,
-            isUncertain: false
+            topCandidates: match.topCandidates,
+            explanation: match.explanation,
+            isUncertain: quality.score < 55 || !match.isReliable,
+            isUnknown: false
           }
         : createUncertainResult(match, signature, quality, mlLabels);
       updateSignalGrid(signature);
@@ -358,11 +413,13 @@ function chooseUpload(file) {
 }
 
 function createUncertainResult(match, signature, quality, mlLabels = []) {
-  const topWarning = quality.warnings.length ? quality.warnings[0] : `The closest stone-like profile was ${match.stone.name}, but the match is too weak to identify confidently.`;
+  const closestStone = match.stone || stones[0];
+  const topWarning = quality.warnings.length ? quality.warnings[0] : `The closest stone-like profile was ${closestStone.name}, but the match is still being treated as a tentative ranking.`;
+  const title = "Closest Matches";
   return {
     id: "uncertain",
-    name: "No Reliable Stone Detected",
-    category: "Low-confidence scan",
+    name: title,
+    category: "Tentative ranking",
     colors: "Mixed image signals",
     texture: "Stone texture not clear",
     formation: topWarning,
@@ -370,14 +427,17 @@ function createUncertainResult(match, signature, quality, mlLabels = []) {
     hardness: "Unknown",
     eco: 0,
     ecoLabel: "Not enough data",
-    confidence: match.confidence,
+    confidence: Math.max(match.confidence, 35),
     signature,
     secondChoice: match.secondChoice,
-    closestStone: match.stone,
+    closestStone,
     mlLabels,
     quality,
+    topCandidates: match.topCandidates,
+    explanation: match.explanation || topWarning,
     isUncertain: true,
-    fact: topWarning,
+    isUnknown: false,
+    fact: match.explanation || topWarning,
     ecology: [
       "The scanner needs a clear view of the stone surface before giving ecology guidance.",
       "Use a close-up photo with the stone filling most of the frame.",
@@ -390,11 +450,11 @@ function createUncertainResult(match, signature, quality, mlLabels = []) {
     ],
     life: [
       ["Scan quality", "The uploaded image does not contain enough stone-like surface information."],
-      ["Closest hint", `${match.stone.name} was the nearest profile, but confidence stayed below the reliable threshold.`],
+      ["Closest hint", `${closestStone.name} was the nearest profile, but confidence stayed below the reliable threshold.`],
       ["Improve image", "Crop closer to the object and keep the stone centered in strong light."],
       ["Scan again", "Run the scan again with a clearer stone photo or choose a sample."]
     ],
-    svg: "granite"
+    svg: closestStone.svg
   };
 }
 
@@ -486,7 +546,18 @@ function analyzeImageSignature(src) {
   });
 }
 
-function matchStone(signature, mlLabels = []) {
+function buildPredictionExplanation(stone, signature, quality, topCandidates = []) {
+  const reasons = [];
+  if (signature.contrast > 0.4) reasons.push("strong surface contrast");
+  if (signature.edge > 0.35) reasons.push("clear texture detail");
+  if (signature.brightness > 0.25 && signature.brightness < 0.8) reasons.push("balanced lighting");
+  if (quality?.sharpness > 60) reasons.push("sharp image detail");
+  if (topCandidates.length > 1) reasons.push(`clear separation from ${topCandidates[1].name}`);
+  if (!reasons.length) reasons.push("visible stone-like texture cues");
+  return `Likely ${stone.name} because the scan showed ${reasons.join(", ")}.`;
+}
+
+function matchStone(signature, mlLabels = [], quality = null) {
   const weights = {
     brightness: 1.35,
     saturation: 0.95,
@@ -503,22 +574,44 @@ function matchStone(signature, mlLabels = []) {
 
   const baselineConfidence = Math.round(clamp(1 - ranked[0].distance / 1.85, 0.58, 0.96) * 100);
   const mlMatch = findMlStoneMatch(mlLabels);
+  const topCandidates = ranked.slice(0, 3).map(({ stone, distance }) => ({
+    id: stone.id,
+    name: stone.name,
+    probability: Math.round(clamp(1 - distance / 1.85, 0.1, 0.96) * 100)
+  }));
 
   if (mlMatch && mlMatch.probability > 0.45) {
-    const mlConfidence = Math.round(clamp(0.8 + mlMatch.probability * 0.2, 0, 1) * 100);
-    if (mlMatch.stone.id === ranked[0].stone.id || baselineConfidence < 75) {
-      return {
-        stone: mlMatch.stone,
-        secondChoice: ranked[0].stone.id === mlMatch.stone.id ? ranked[1].stone : ranked[0].stone,
-        confidence: Math.max(baselineConfidence, mlConfidence)
-      };
+    const mlStoneId = mlMatch.stone.id;
+    const mlCandidateIndex = topCandidates.findIndex((candidate) => candidate.id === mlStoneId);
+    const mlConfidence = Math.round(clamp(0.75 + mlMatch.probability * 0.2, 0, 1) * 100);
+    if (mlCandidateIndex >= 0) {
+      topCandidates[mlCandidateIndex].probability = Math.max(topCandidates[mlCandidateIndex].probability, mlConfidence);
+    } else {
+      topCandidates.push({ id: mlStoneId, name: mlMatch.stone.name, probability: mlConfidence });
     }
+    topCandidates.sort((a, b) => b.probability - a.probability);
   }
 
+  const topCandidate = topCandidates[0];
+  const secondCandidate = topCandidates[1];
+  const top1Probability = topCandidate ? topCandidate.probability / 100 : 0;
+  const top2Probability = secondCandidate ? secondCandidate.probability / 100 : 0;
+  const margin = top1Probability - top2Probability;
+  const isUnknown = top1Probability < 0.14 && margin < 0.01;
+  const confidence = Math.max(baselineConfidence, Math.round(top1Probability * 100));
+  const stone = stones.find((entry) => entry.id === topCandidate.id) || ranked[0].stone;
+  const explanation = buildPredictionExplanation(stone, signature, quality, topCandidates);
+  const qualityModifier = getQualityModifier(quality);
+  const adjustedConfidence = Math.max(24, Math.round(confidence * qualityModifier));
+
   return {
-    stone: ranked[0].stone,
-    secondChoice: ranked[1].stone,
-    confidence: baselineConfidence
+    stone,
+    secondChoice: secondCandidate ? stones.find((entry) => entry.id === secondCandidate.id) || ranked[1].stone : ranked[1].stone,
+    confidence: adjustedConfidence,
+    topCandidates,
+    explanation,
+    isReliable: adjustedConfidence >= MIN_RELIABLE_CONFIDENCE || top1Probability >= 0.3,
+    isUnknown
   };
 }
 
@@ -592,7 +685,38 @@ function findMlStoneMatch(labels) {
   return null;
 }
 
+async function predictWithStoneModel(image, limit = 5) {
+  if (!stoneClassifierModel) return [];
+
+  const tensor = tf.tidy(() => {
+    return tf.browser.fromPixels(image, 3)
+      .resizeNearestNeighbor([224, 224])
+      .toFloat()
+      .div(255.0)
+      .expandDims(0);
+  });
+
+  const prediction = stoneClassifierModel.predict(tensor);
+  const probabilities = await prediction.data();
+  const ranked = Array.from(probabilities).map((probability, index) => ({
+    className: stoneClassifierLabels[index] || `class_${index}`,
+    probability
+  })).sort((a, b) => b.probability - a.probability).slice(0, limit);
+
+  tensor.dispose();
+  if (Array.isArray(prediction)) {
+    prediction.forEach((item) => item.dispose());
+  } else {
+    prediction.dispose();
+  }
+
+  return ranked;
+}
+
 function predictImageLabels(image) {
+  if (stoneClassifierModel && stoneClassifierLabels.length) {
+    return predictWithStoneModel(image, 5).catch(() => []);
+  }
   if (!mobileNetModel) return Promise.resolve([]);
   return mobileNetModel.classify(image, 5).catch(() => []);
 }
@@ -643,7 +767,10 @@ function assessImageQuality(imageData, signature, foregroundRatio = 0.5, mlLabel
   const sizeScore = clamp(foregroundRatio * 1.1 + Math.min(size, 160) / 160 * 0.2);
   const contrastScore = signature.contrast;
   const brightnessScore = 1 - Math.abs(signature.brightness - 0.5) * 1.6;
-  const overall = clamp((sharpnessScore * 0.28) + (focusScore * 0.28) + (sizeScore * 0.2) + (contrastScore * 0.14) + (brightnessScore * 0.1));
+  const blurScore = clamp((sharpnessScore + 0.4) / 1.4);
+  const stoneCoverage = clamp(foregroundRatio * 1.1);
+  const backgroundComplexity = clamp(1 - foregroundRatio + 0.15);
+  const overall = clamp((sharpnessScore * 0.24) + (focusScore * 0.24) + (sizeScore * 0.16) + (contrastScore * 0.13) + (brightnessScore * 0.1) + (blurScore * 0.13));
 
   const normalizedLabels = mlLabels.flatMap((entry) => entry.className.toLowerCase().split(/[,&]/g).map((part) => part.trim().replace(/[^a-z0-9 ]/g, "")));
   const detectedBackground = normalizedLabels.find((label) => ML_BACKGROUND_LABELS.has(label));
@@ -667,7 +794,10 @@ function assessImageQuality(imageData, signature, foregroundRatio = 0.5, mlLabel
     focus: Math.round(focusScore * 100),
     sizeScore: Math.round(sizeScore * 100),
     brightness: Math.round(signature.brightness * 100),
-    contrast: Math.round(contrastScore * 100)
+    contrast: Math.round(contrastScore * 100),
+    blur: Math.round(blurScore * 100),
+    stoneCoverage: Math.round(stoneCoverage * 100),
+    backgroundComplexity: Math.round(backgroundComplexity * 100)
   };
 }
 
@@ -706,23 +836,43 @@ function renderResult(stone) {
   resultEmpty.classList.add("hidden");
   resultCard.classList.remove("hidden");
   document.querySelector("#confidenceLabel").textContent = stone.isUncertain
-    ? "Uncertain Scan"
+    ? "Closest Match"
     : stone.confidence < 90 ? "Closest Match" : "Identification";
   document.querySelector("#stoneName").textContent = stone.name;
   document.querySelector("#stoneCategory").textContent = stone.category;
   document.querySelector("#confidenceValue").textContent = `${stone.confidence}%`;
   document.querySelector(".confidence-meter").style.setProperty("--score", `${stone.confidence}%`);
+  if (confidenceBadge) {
+    confidenceBadge.textContent = stone.isUnknown ? "Needs more evidence" : stone.isUncertain ? "Uncertain" : stone.confidence >= 85 ? "Confident" : "Reasonable";
+  }
+  if (confidenceStatus) {
+    confidenceStatus.textContent = stone.isUnknown ? "No reliable match yet" : stone.isUncertain ? "Top candidates are close" : "Likely match";
+  }
+  if (confidenceExplanation) {
+    confidenceExplanation.textContent = stone.explanation || stone.fact || "The scanner used texture, color, and quality cues to form this recommendation.";
+  }
+  if (topCandidatesList) {
+    const candidates = (stone.topCandidates || []).slice(0, 3);
+    topCandidatesList.innerHTML = candidates.length
+      ? candidates.map(({ name, probability }) => `<li><span>${name}</span><strong>${probability}%</strong></li>`).join("")
+      : `<li><span>${stone.name}</span><strong>${stone.confidence}%</strong></li>`;
+  }
   if (qualityNotice) {
     const qualityText = stone.quality?.label || "Image readiness is still being evaluated.";
     qualityNotice.textContent = stone.isUncertain ? `Quality check: ${qualityText}` : `Quality check: ${qualityText}`;
   }
   resultStoneArt.innerHTML = stone.isUncertain ? stoneSvg((stone.closestStone || stones[0]).svg) : stoneSvg(stone.svg);
-  document.querySelector("#quickFacts").innerHTML = [
-    ["Texture", stone.texture],
-    ["Colors", stone.colors],
-    ["Found In", stone.found],
-    ["Formation", stone.formation]
-  ].map(([label, value]) => `<div class="fact"><span>${label}</span><strong>${value}</strong></div>`).join("");
+  const topCandidatesMarkup = (stone.topCandidates || []).slice(0, 3).map(({ name, probability }) => `
+    <div class="fact"><span>${name}</span><strong>${probability}%</strong></div>
+  `).join("");
+  document.querySelector("#quickFacts").innerHTML = `
+    <div class="fact"><span>Top predictions</span><strong>${(stone.topCandidates || []).slice(0, 3).map(({ name, probability }) => `${name} ${probability}%`).join(" · ")}</strong></div>
+    ${topCandidatesMarkup}
+    <div class="fact"><span>Texture</span><strong>${stone.texture}</strong></div>
+    <div class="fact"><span>Colors</span><strong>${stone.colors}</strong></div>
+    <div class="fact"><span>Found In</span><strong>${stone.found}</strong></div>
+    <div class="fact"><span>Formation</span><strong>${stone.formation}</strong></div>
+  `;
 
   document.querySelectorAll(".tab").forEach((button) => {
     button.classList.toggle("active", button.dataset.tab === activeTab);
@@ -755,9 +905,10 @@ function renderQualityPanel(quality) {
 
   const score = quality?.score ?? 0;
   const summary = quality?.label || "Waiting for scan";
+  const detailText = quality ? `${score}/100 · blur ${quality.blur ?? 0}% · coverage ${quality.stoneCoverage ?? 0}%` : "Waiting for scan";
   const tips = quality?.warnings?.length ? quality.warnings : ["The image looks suitable for a first pass. Keep the stone centered for better results."];
 
-  qualitySummary.textContent = summary;
+  qualitySummary.textContent = `${summary} · ${detailText}`;
   qualityBarFill.style.width = `${Math.max(8, score)}%`;
   qualityBarFill.style.background = score >= 75 ? "linear-gradient(90deg, var(--accent), var(--sky))" : score >= 50 ? "linear-gradient(90deg, var(--gold), var(--accent))" : "linear-gradient(90deg, var(--danger), var(--accent-2))";
   qualityTips.innerHTML = tips.map((tip) => `<li>${tip}</li>`).join("");
@@ -771,7 +922,7 @@ function renderTab(stone) {
   if (activeTab === "about") {
     tabPanel.innerHTML = `
       <div class="insight-grid">
-        <div class="insight-card"><h3>Recognition Note</h3><p>${stone.fact}</p></div>
+        <div class="insight-card"><h3>Recognition Note</h3><p>${stone.explanation || stone.fact}</p></div>
         <div class="insight-card"><h3>Did You Mean?</h3><p>${didYouMeanText(stone)}</p></div>
         <div class="insight-card"><h3>Key Property</h3><p>${stone.hardness} hardness with ${stone.texture.toLowerCase()}.</p></div>
         <div class="insight-card"><h3>Typical Origin</h3><p>${stone.found}.</p></div>

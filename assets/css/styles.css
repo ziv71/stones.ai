@@ -834,6 +834,20 @@ h3 {
   line-height: 1.5;
 }
 
+.scan-frame[role="button"] {
+  cursor: pointer;
+}
+
+.scan-frame[role="button"]:focus-visible,
+.scanner-stage.is-dragging .scan-frame {
+  outline: 3px solid rgba(239, 201, 132, 0.8);
+  outline-offset: 4px;
+}
+
+.scanner-stage.is-dragging .scan-frame {
+  background: rgba(215, 111, 159, 0.12);
+}
+
 .scanner-actions .secondary-button {
   min-width: 140px;
   border-color: rgba(255, 255, 255, 0.18);

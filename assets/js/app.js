@@ -594,20 +594,21 @@ function selectStone(id) {
   showPage("scanPage");
 }
 
-let currentImageAnalysisToken = 0;
-
 // Remove background from image to isolate the rock
 async function removeBackground(imageSrc) {
-
   return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0);
+      try {
+        // Processing a phone photo at full resolution can lock the page for seconds.
+        const maxDimension = 900;
+        const scale = Math.min(1, maxDimension / Math.max(img.naturalWidth, img.naturalHeight));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imageData.data;
@@ -624,7 +625,11 @@ async function removeBackground(imageSrc) {
       }
       
       ctx.putImageData(imageData, 0, 0);
-      resolve(canvas.toDataURL("image/png"));
+        resolve(canvas.toDataURL("image/png"));
+      } catch (error) {
+        // Cross-origin servers may allow display but block pixel access.
+        resolve(imageSrc);
+      }
     };
     img.onerror = () => resolve(imageSrc);
     img.src = imageSrc;
@@ -738,6 +743,8 @@ function chooseUpload(file) {
     return;
   }
 
+  // Allow choosing the same file again after a reset or failed attempt.
+  fileInput.value = "";
   scanStatus.textContent = "Reading image...";
   if (typeof URL !== "undefined" && typeof URL.createObjectURL === "function") {
     const objectUrl = URL.createObjectURL(file);
@@ -760,11 +767,22 @@ function chooseUpload(file) {
   reader.readAsDataURL(file);
 }
 
+function validateImageSource(src) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(src);
+    image.onerror = () => reject(new Error("Invalid image"));
+    image.src = src;
+  });
+}
+
 function loadScannedImage(src) {
   if (!src) return;
   const analysisToken = ++currentImageAnalysisToken;
   
   scanStatus.textContent = "Processing image...";
+  scanButton.disabled = true;
+  scanButton.textContent = "Loading...";
   
   removeBackground(src).then((processedSrc) => {
     if (analysisToken !== currentImageAnalysisToken) return;
@@ -911,6 +929,16 @@ function loadImageUrl(url) {
   loadScannedImage(source);
 }
 
+function getDroppedUrl(dataTransfer) {
+  const uri = dataTransfer?.getData("text/uri-list")?.split(/\r?\n/).find((line) => line && !line.startsWith("#"));
+  if (uri) return uri;
+  const plainText = dataTransfer?.getData("text/plain")?.trim();
+  if (/^(?:https?:)?\/\//i.test(plainText || "")) return plainText;
+  const html = dataTransfer?.getData("text/html") || "";
+  const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+  return match?.[1] || "";
+}
+
 function handleClipboardPaste(event) {
   const items = event.clipboardData?.items;
   if (items) {
@@ -918,6 +946,7 @@ function handleClipboardPaste(event) {
       if (item.type.startsWith("image/")) {
         const file = item.getAsFile();
         if (file) {
+          event.preventDefault();
           chooseUpload(file);
           return;
         }
@@ -927,6 +956,7 @@ function handleClipboardPaste(event) {
   const text = event.clipboardData?.getData("text/plain")?.trim();
   if (text) {
     if (/^https?:\/\//i.test(text) || /\.(png|jpe?g|webp|gif|bmp)(\?|$)/i.test(text)) {
+      event.preventDefault();
       loadImageUrl(text);
       return;
     }
@@ -1018,6 +1048,7 @@ function analyzeImageSignature(src) {
     const image = new Image();
     image.crossOrigin = "anonymous";
     image.onload = async () => {
+      try {
       const square = Math.min(image.width, image.height);
       const size = 160;
       const canvas = document.createElement("canvas");
@@ -1123,6 +1154,17 @@ function analyzeImageSignature(src) {
       const quality = assessImageQuality(imageData, signature, foregroundCount / (size * size), mlLabels);
 
       resolve({ signature, quality, mlLabels });
+      } catch (error) {
+        resolve({
+          signature: stones[0].signature,
+          quality: {
+            score: 0,
+            label: "URL blocks image analysis",
+            warnings: ["This website blocks browser access to its image. Download the photo, then drop or upload the file instead."]
+          },
+          mlLabels: []
+        });
+      }
     };
     image.onerror = () => resolve({
       signature: stones[0].signature,
@@ -1651,6 +1693,12 @@ sampleGrid.addEventListener("click", (event) => {
 fileInput.addEventListener("change", (event) => chooseUpload(event.target.files[0]));
 pasteButton.addEventListener("click", requestPasteImage);
 urlButton.addEventListener("click", () => loadImageUrl(urlInput.value));
+urlInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    loadImageUrl(urlInput.value);
+  }
+});
 window.addEventListener("paste", handleClipboardPaste);
 scanButton.addEventListener("click", scanStone);
 resetButton.addEventListener("click", () => {
@@ -1674,21 +1722,39 @@ navButtons.forEach((button) => {
 
 dropZone.addEventListener("dragover", (event) => {
   event.preventDefault();
+  if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+  dropZone.classList.add("is-dragging");
   scanFrame.classList.add("is-scanning");
   scanStatus.textContent = "Drop to load";
 });
 
 dropZone.addEventListener("dragleave", () => {
+  dropZone.classList.remove("is-dragging");
   scanFrame.classList.remove("is-scanning");
   scanStatus.textContent = selectedImage ? "Image loaded" : "Standby";
 });
 dropZone.addEventListener("drop", (event) => {
   event.preventDefault();
+  dropZone.classList.remove("is-dragging");
   scanFrame.classList.remove("is-scanning");
   const droppedImage = event.dataTransfer?.files?.[0] || Array.from(event.dataTransfer?.items || [])
     .map((item) => item.getAsFile())
     .find(Boolean);
-  chooseUpload(droppedImage);
+  if (droppedImage) {
+    chooseUpload(droppedImage);
+  } else {
+    const droppedUrl = getDroppedUrl(event.dataTransfer);
+    if (droppedUrl) loadImageUrl(droppedUrl);
+    else scanStatus.textContent = "Drop an image file or a direct image URL.";
+  }
+});
+
+scanFrame.addEventListener("click", () => fileInput.click());
+scanFrame.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    fileInput.click();
+  }
 });
 
 document.querySelectorAll(".tab").forEach((button) => {

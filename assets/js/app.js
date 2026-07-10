@@ -538,10 +538,33 @@ function selectStone(id) {
   showPage("scanPage");
 }
 
+function validateImageSource(src) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Invalid image source"));
+    image.src = src;
+  });
+}
+
 function chooseUpload(file) {
-  if (!file || !file.type.startsWith("image/")) return;
+  if (!file || !file.type.startsWith("image/")) {
+    scanStatus.textContent = "Please choose a valid image file.";
+    return;
+  }
+
   const reader = new FileReader();
-  reader.onload = () => loadScannedImage(reader.result);
+  reader.onload = async () => {
+    try {
+      await validateImageSource(reader.result);
+      loadScannedImage(reader.result);
+    } catch (error) {
+      scanStatus.textContent = "The selected file is not a valid image.";
+    }
+  };
+  reader.onerror = () => {
+    scanStatus.textContent = "The selected file could not be read.";
+  };
   reader.readAsDataURL(file);
 }
 

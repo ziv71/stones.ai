@@ -1219,6 +1219,27 @@ h3 {
   line-height: 0.95;
 }
 
+/* Rock-derived text palette for the empty scan result. */
+#resultsPage .result-empty .eyebrow {
+  color: #c2a477;
+  background: none;
+  -webkit-background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+  background-clip: border-box;
+}
+
+#resultsPage .result-empty h2 {
+  color: #d8ccb6;
+  background: linear-gradient(100deg, #dfd3b5 0%, #b99b74 42%, #a9a79d 70%, #82908f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#resultsPage .result-empty > p:last-child {
+  color: #bdb3a5;
+}
+
 
 .hidden {
   display: none;
@@ -1587,13 +1608,43 @@ h3 {
   display: grid;
   grid-template-columns: 1.3fr repeat(2, minmax(220px, 0.7fr));
   gap: 18px;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(156, 126, 88, 0.12), transparent 32%),
+    radial-gradient(circle at 90% 84%, rgba(85, 96, 88, 0.1), transparent 30%),
+    #0d0c0a;
+}
+
+/* Keep the Project navigation state in the same geological palette. */
+.nav-button[data-page="projectPage"]:hover,
+.nav-button[data-page="projectPage"].active {
+  border-color: rgba(177, 148, 108, 0.38);
+  color: #e2d4bd;
+  background: linear-gradient(135deg, rgba(112, 82, 55, 0.48), rgba(61, 70, 63, 0.42));
+  box-shadow: inset 0 1px 0 rgba(235, 222, 199, 0.1), 0 10px 24px rgba(0, 0, 0, 0.24);
+}
+
+#projectPage .eyebrow {
+  color: #bca77f;
+  background: none;
+  -webkit-background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+  background-clip: border-box;
+}
+
+#projectPage .project-hero h2 {
+  color: #ddd3c3;
+  background: none;
+  -webkit-background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+  background-clip: border-box;
+  text-shadow: 0 2px 22px rgba(0, 0, 0, 0.38);
 }
 
 .project-hero,
 .project-card {
-  border: 1px solid rgba(123, 199, 164, 0.18);
+  border: 1px solid rgba(151, 137, 116, 0.24);
   border-radius: 24px;
-  background: linear-gradient(135deg, rgba(123, 199, 164, 0.08), rgba(255, 248, 240, 0.02));
+  background: linear-gradient(135deg, rgba(139, 122, 96, 0.1), rgba(38, 36, 33, 0.05));
   position: relative;
   overflow: hidden;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 18px 38px rgba(0, 0, 0, 0.24);
@@ -1607,7 +1658,7 @@ h3 {
   width: 140px;
   height: 140px;
   border-radius: 42% 58% 62% 38% / 40% 42% 58% 60%;
-  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.16), transparent 40%), rgba(123, 199, 164, 0.12);
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.12), transparent 40%), var(--project-stone-soft, rgba(119, 106, 87, 0.15));
   filter: blur(0px);
   opacity: 0.7;
   pointer-events: none;
@@ -1632,13 +1683,17 @@ h3 {
 }
 
 #projectPage .project-card span {
-  border-color: rgba(255, 255, 255, 0.2);
-  color: #e8e3d3;
-  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--project-stone-border, rgba(255, 255, 255, 0.2));
+  color: var(--project-stone-text, #e8e3d3);
+  background: var(--project-stone-soft, rgba(255, 255, 255, 0.06));
 }
 
 #projectPage .project-card h3 {
-  color: #fff;
+  color: var(--project-stone-text, #d8d0c2);
+  background: none;
+  -webkit-background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+  background-clip: border-box;
 }
 
 #projectPage .project-card:nth-of-type(1) {
@@ -1647,23 +1702,35 @@ h3 {
 }
 
 #projectPage .project-card:nth-of-type(2) {
-  border-color: rgba(110, 118, 126, 0.18);
-  background: linear-gradient(145deg, rgba(112, 118, 124, 0.12), rgba(18, 20, 22, 0.95));
+  --project-stone-border: rgba(194, 132, 88, 0.5);
+  --project-stone-text: #d79a70;
+  --project-stone-soft: rgba(150, 82, 48, 0.22);
+  border-color: rgba(194, 132, 88, 0.3);
+  background: linear-gradient(145deg, #442d22 0%, #251b16 52%, #13100e 100%);
 }
 
 #projectPage .project-card:nth-of-type(3) {
-  border-color: rgba(222, 217, 208, 0.16);
-  background: linear-gradient(145deg, rgba(234, 230, 222, 0.12), rgba(22, 20, 18, 0.94));
+  --project-stone-border: rgba(135, 158, 169, 0.48);
+  --project-stone-text: #a8bdc5;
+  --project-stone-soft: rgba(76, 103, 115, 0.22);
+  border-color: rgba(135, 158, 169, 0.3);
+  background: linear-gradient(145deg, #27363d 0%, #192126 52%, #101315 100%);
 }
 
 #projectPage .project-card:nth-of-type(4) {
-  border-color: rgba(134, 150, 158, 0.18);
-  background: linear-gradient(145deg, rgba(146, 156, 164, 0.12), rgba(16, 18, 20, 0.96));
+  --project-stone-border: rgba(211, 198, 169, 0.48);
+  --project-stone-text: #d9cdb1;
+  --project-stone-soft: rgba(175, 157, 118, 0.2);
+  border-color: rgba(211, 198, 169, 0.28);
+  background: linear-gradient(145deg, #3b372d 0%, #242119 52%, #14120f 100%);
 }
 
 #projectPage .project-card:nth-of-type(5) {
-  border-color: rgba(116, 128, 118, 0.18);
-  background: linear-gradient(145deg, rgba(132, 148, 132, 0.12), rgba(16, 18, 18, 0.96));
+  --project-stone-border: rgba(132, 154, 119, 0.48);
+  --project-stone-text: #a9bb9d;
+  --project-stone-soft: rgba(76, 104, 69, 0.22);
+  border-color: rgba(132, 154, 119, 0.3);
+  background: linear-gradient(145deg, #2b3928 0%, #1a2419 52%, #101410 100%);
 }
 
 #projectPage .project-card p {
@@ -1699,11 +1766,11 @@ h3 {
   padding: 28px;
   color: var(--text);
   background:
-    linear-gradient(180deg, rgba(7, 4, 5, 0.04), rgba(7, 4, 5, 0.92)),
-    linear-gradient(135deg, rgba(215, 111, 159, 0.24), transparent 38%),
-    linear-gradient(315deg, rgba(123, 199, 164, 0.2), transparent 42%),
-    linear-gradient(120deg, rgba(240, 199, 119, 0.16), transparent 58%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='700' viewBox='0 0 900 700'%3E%3Crect width='900' height='700' fill='%23050304'/%3E%3Cpath d='M84 501c118-141 255-176 410-105 87 40 181 33 282-22 42-22 83-29 124-20v346H0V626c26-41 54-83 84-125Z' fill='%23191212'/%3E%3Cpath d='M0 642c120-80 244-99 372-56 94 31 173 50 267 15 91-34 168-57 261-34v133H0Z' fill='%23221118'/%3E%3Cpath d='M245 318c67-89 226-95 310-8 70 72 47 178-50 229-104 54-264 18-319-72-28-47-8-104 59-149Z' fill='%23342b27'/%3E%3Cpath d='M284 356c83-35 163-36 241-2M252 437c97 45 191 50 284 14' stroke='%23f3e4cf' stroke-width='13' stroke-linecap='round' opacity='.46'/%3E%3Cpath d='M83 114h206M611 111h190M102 157h94M657 156h81' stroke='%23d76f9f' stroke-width='4' opacity='.55'/%3E%3Cpath d='M686 57c-27 54-20 101 22 140 42 39 47 82 15 130' stroke='%23efc984' stroke-width='5' fill='none' opacity='.38'/%3E%3C/svg%3E");
+    linear-gradient(180deg, rgba(8, 7, 5, 0.08), rgba(8, 7, 5, 0.94)),
+    linear-gradient(135deg, rgba(119, 82, 54, 0.34), transparent 42%),
+    linear-gradient(315deg, rgba(75, 84, 77, 0.24), transparent 46%),
+    linear-gradient(120deg, rgba(142, 124, 94, 0.2), transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='700' viewBox='0 0 900 700'%3E%3Crect width='900' height='700' fill='%23070605'/%3E%3Cpath d='M84 501c118-141 255-176 410-105 87 40 181 33 282-22 42-22 83-29 124-20v346H0V626c26-41 54-83 84-125Z' fill='%231b1916'/%3E%3Cpath d='M0 642c120-80 244-99 372-56 94 31 173 50 267 15 91-34 168-57 261-34v133H0Z' fill='%23231f1a'/%3E%3Cpath d='M245 318c67-89 226-95 310-8 70 72 47 178-50 229-104 54-264 18-319-72-28-47-8-104 59-149Z' fill='%233a342c'/%3E%3Cpath d='M284 356c83-35 163-36 241-2M252 437c97 45 191 50 284 14' stroke='%23d8cfbf' stroke-width='13' stroke-linecap='round' opacity='.42'/%3E%3Cpath d='M83 114h206M611 111h190M102 157h94M657 156h81' stroke='%238b7965' stroke-width='4' opacity='.5'/%3E%3Cpath d='M686 57c-27 54-20 101 22 140 42 39 47 82 15 130' stroke='%23a99572' stroke-width='5' fill='none' opacity='.34'/%3E%3C/svg%3E");
   background-size: cover;
   background-position: center;
 }
@@ -1723,10 +1790,10 @@ h3 {
 
 .project-hero-meta span {
   padding: 8px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(184, 159, 122, 0.25);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #f8ebd9;
+  background: rgba(83, 68, 49, 0.32);
+  color: #ddcfb9;
   font-size: 0.84rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -1736,7 +1803,7 @@ h3 {
 .project-hero-callout {
   max-width: 520px;
   padding: 16px 18px;
-  border: 1px solid rgba(240, 199, 119, 0.24);
+  border: 1px solid rgba(174, 151, 112, 0.28);
   border-radius: 18px;
   background: rgba(8, 6, 6, 0.52);
   backdrop-filter: blur(10px);
@@ -1745,7 +1812,7 @@ h3 {
 .project-hero-callout strong {
   display: block;
   margin-bottom: 6px;
-  color: #ffe9be;
+  color: #e5d5b9;
 }
 
 .project-hero-callout p {
@@ -1760,7 +1827,7 @@ h3 {
 
 .project-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(240, 199, 119, 0.28);
+  border-color: rgba(183, 160, 125, 0.36);
 }
 
 .project-card span {

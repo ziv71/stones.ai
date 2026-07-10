@@ -375,6 +375,7 @@ let selectedStone = stones[0];
 let selectedImage = "";
 let activeTab = "about";
 let activePage = "scanPage";
+let currentImageAnalysisToken = 0;
 
 function showPage(pageId, options = { scroll: true }) {
   activePage = pageId;
@@ -534,6 +535,8 @@ function selectStone(id) {
   emptyState.style.display = "none";
   updateSignalGrid(selectedStone.signature);
   scanStatus.textContent = "Sample loaded";
+  scanButton.disabled = false;
+  scanButton.textContent = "Scan Stone";
   renderSamples();
   showPage("scanPage");
 }
@@ -570,34 +573,51 @@ function chooseUpload(file) {
 
 function loadScannedImage(src) {
   if (!src) return;
+  const analysisToken = ++currentImageAnalysisToken;
   selectedImage = src;
   previewImage.src = selectedImage;
   previewImage.style.display = "block";
   emptyState.style.display = "none";
-  analyzeImageSignature(selectedImage).then(({ signature, quality, mlLabels }) => {
-    const match = matchStone(signature, mlLabels, quality);
-    const adjustedConfidence = Math.max(24, Math.min(95, match.confidence));
-    const fallbackStone = stones.find((stone) => stone.id === match.topCandidates?.[0]?.id) || match.secondChoice || stones[0];
-    const shouldShowPrediction = Boolean(match.topCandidates?.length);
-    selectedStone = shouldShowPrediction
-      ? {
-          ...(match.stone || fallbackStone),
-          confidence: adjustedConfidence,
-          matchedSignature: signature,
-          secondChoice: match.secondChoice,
-          mlLabels,
-          quality,
-          topCandidates: match.topCandidates,
-          explanation: match.explanation,
-          isUncertain: !match.isReliable || quality.score < 35,
-          isUnknown: false
-        }
-      : createUncertainResult(match, signature, quality, mlLabels);
-    updateSignalGrid(signature);
-    renderQualityPanel(quality);
-    scanStatus.textContent = quality.label;
-    renderSamples();
-  });
+  scanButton.disabled = true;
+  scanButton.textContent = "Analyzing...";
+  scanStatus.textContent = "Analyzing image...";
+
+  analyzeImageSignature(selectedImage)
+    .then(({ signature, quality, mlLabels }) => {
+      if (analysisToken !== currentImageAnalysisToken) return;
+      const match = matchStone(signature, mlLabels, quality);
+      const adjustedConfidence = Math.max(24, Math.min(95, match.confidence));
+      const fallbackStone = stones.find((stone) => stone.id === match.topCandidates?.[0]?.id) || match.secondChoice || stones[0];
+      const shouldShowPrediction = Boolean(match.topCandidates?.length);
+      selectedStone = shouldShowPrediction
+        ? {
+            ...(match.stone || fallbackStone),
+            confidence: adjustedConfidence,
+            matchedSignature: signature,
+            secondChoice: match.secondChoice,
+            mlLabels,
+            quality,
+            topCandidates: match.topCandidates,
+            explanation: match.explanation,
+            isUncertain: !match.isReliable || quality.score < 35,
+            isUnknown: false
+          }
+        : createUncertainResult(match, signature, quality, mlLabels);
+      updateSignalGrid(signature);
+      renderQualityPanel(quality);
+      scanStatus.textContent = quality.label;
+      renderSamples();
+    })
+    .catch(() => {
+      if (analysisToken !== currentImageAnalysisToken) return;
+      scanStatus.textContent = "The selected image could not be analyzed.";
+    })
+    .finally(() => {
+      if (analysisToken === currentImageAnalysisToken) {
+        scanButton.disabled = false;
+        scanButton.textContent = "Scan Stone";
+      }
+    });
 }
 
 function loadImageUrl(url) {
@@ -1126,6 +1146,11 @@ function clamp(value, min = 0, max = 1) {
 function scanStone() {
   if (!selectedImage) {
     selectStone(selectedStone.id);
+  }
+
+  if (scanButton.disabled) {
+    scanStatus.textContent = "Analyzing image...";
+    return;
   }
 
   scanStatus.textContent = "Scanning";

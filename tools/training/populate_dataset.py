@@ -9,13 +9,6 @@ for split in ['train', 'val', 'test']:
         (root / split / cls).mkdir(parents=True, exist_ok=True)
 
 asset_names = [
-    'crystal-machine-check.png',
-    'crystal-machine-final-check.png',
-    'crystal-machine-no-squares-check.png',
-    'crystal-machine-real-stone-check.png',
-    'crystal-machine-real-stone-final.png',
-    'crystal-machine-stone-check.png',
-    'crystal-machine-stone-check-2.png',
     'linked-scan-check.png',
 ]
 

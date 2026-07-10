@@ -30,6 +30,15 @@ const stones = [
       ["Sustainable future", "Reused granite can avoid new quarry damage and keep material in circulation."]
     ],
     svg: "granite",
+    videoUrl: "https://www.youtube.com/watch?v=_SkZTIrR0-U",
+    artwork: {
+      title: "Cape Ann Granite",
+      artist: "Edward Hopper",
+      year: "1928",
+      imageUrl: "https://upload.wikimedia.org/wikipedia/commons/a/a4/Cape_Ann_Granite%2C_by_Edward_Hopper.png",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Cape_Ann_Granite,_by_Edward_Hopper.png",
+      caption: "Edward Hopper, 'Cape Ann Granite' (1928) — public domain image on Wikimedia Commons."
+    },
     accentColor: "#a8b0b4",
     softColor: "rgba(168, 176, 180, 0.14)",
     glowColor: "rgba(176, 186, 190, 0.12)",
@@ -68,6 +77,15 @@ const stones = [
       ["Design reuse", "Basalt can become tiles, aggregate, sculpture, or landscape material."]
     ],
     svg: "basalt",
+    videoUrl: "https://www.youtube.com/watch?v=7dH4iW9QSq4",
+    artwork: {
+      title: "Hadad (illustration)",
+      artist: "Jewish Encyclopedia (source)",
+      year: "c.1905",
+      imageUrl: "https://upload.wikimedia.org/wikipedia/commons/6/6b/Hadad.jpg",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Hadad.jpg",
+      caption: "Public-domain illustration of a basalt statue (Hadad) from Wikimedia Commons."
+    },
     accentColor: "#7a838d",
     softColor: "rgba(122, 131, 141, 0.16)",
     glowColor: "rgba(128, 138, 148, 0.12)",
@@ -106,6 +124,15 @@ const stones = [
       ["Circular use", "Old marble can be recut, repaired, or transformed into mosaics."]
     ],
     svg: "marble",
+    videoUrl: "https://www.youtube.com/watch?v=LHgifUKUqWw",
+    artwork: {
+      title: "Marble sculpture @ MFA",
+      artist: "Thomas Oboe Lee (photo)",
+      year: "2010",
+      imageUrl: "https://upload.wikimedia.org/wikipedia/commons/3/34/Marble_sculpture_%40_MFA.jpg",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Marble_sculpture_@_MFA.jpg",
+      caption: "Photograph of a marble sculpture from the Museum of Fine Arts (CC BY-SA 4.0)."
+    },
     accentColor: "#d8dbd9",
     softColor: "rgba(216, 219, 217, 0.14)",
     glowColor: "rgba(232, 234, 233, 0.14)",
@@ -144,6 +171,15 @@ const stones = [
       ["Careful use", "Builders can use local sandstone while protecting fragile landforms."]
     ],
     svg: "sandstone",
+    videoUrl: "https://www.youtube.com/watch?v=NJdhDBfnMr8",
+    artwork: {
+      title: "Rocky Landscape in the Elbe Sandstone Mountains",
+      artist: "Caspar David Friedrich",
+      year: "1822-1823",
+      imageUrl: "https://upload.wikimedia.org/wikipedia/commons/c/c1/Rocky_Landscape_in_the_Elbe_Sandstone_Mountains_-_Caspar_David_Friedrich_-_Google_Cultural_Institute.jpg",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Rocky_Landscape_in_the_Elbe_Sandstone_Mountains_-_Caspar_David_Friedrich_-_Google_Cultural_Institute.jpg",
+      caption: "Caspar David Friedrich, landscape showing Elbe sandstone formations (public-domain reproduction)."
+    },
     accentColor: "#ad8f7d",
     softColor: "rgba(173, 143, 125, 0.14)",
     glowColor: "rgba(200, 173, 148, 0.12)",
@@ -182,6 +218,15 @@ const stones = [
       ["Modern challenge", "Its role in cement makes careful material choices important."]
     ],
     svg: "limestone",
+    videoUrl: "https://www.youtube.com/watch?v=0Y6vH4UQymQ",
+    artwork: {
+      title: "Limestone Mountains of Sarawak, Borneo",
+      artist: "Marianne North",
+      year: "1876",
+      imageUrl: "https://upload.wikimedia.org/wikipedia/commons/f/fc/Marianne_North_%281830-1890%29_-_Limestone_Mountains_of_Sarawak%2C_Borneo_-_MN328_-_Marianne_North_Gallery.jpg",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Marianne_North_(1830-1890)_-_Limestone_Mountains_of_Sarawak,_Borneo_-_MN328_-_Marianne_North_Gallery.jpg",
+      caption: "Marianne North, painting of limestone karst in Borneo (public-domain reproduction)."
+    },
     accentColor: "#c3beb3",
     softColor: "rgba(195, 190, 179, 0.14)",
     glowColor: "rgba(220, 216, 206, 0.12)",
@@ -220,6 +265,15 @@ const stones = [
       ["Reuse", "Old tiles can be salvaged for roofs, gardens, and art projects."]
     ],
     svg: "slate",
+    videoUrl: "https://www.youtube.com/watch?v=4YntG9ZYM3k",
+    artwork: {
+      title: "Slate Quarries",
+      artist: "John Crome",
+      year: "1802-1805",
+      imageUrl: "https://upload.wikimedia.org/wikipedia/commons/6/6e/John_Crome_%281768-1821%29_-_Slate_Quarries_-_NG1037_-_Tate.jpg",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:John_Crome_(1768-1821)_-_Slate_Quarries_-_NG1037_-_Tate.jpg",
+      caption: "John Crome, 'Slate Quarries' — public-domain painting showing slate landscapes."
+    },
     accentColor: "#7f8790",
     softColor: "rgba(127, 135, 144, 0.14)",
     glowColor: "rgba(151, 159, 169, 0.12)",
@@ -1215,6 +1269,14 @@ function renderTab(stone) {
 
   if (activeTab === "art") {
     const artwork = stone.artwork || null;
+    const videoHtml = stone.videoUrl ? `
+      <div class="artwork-card">
+        <div class="artwork-meta">
+          <h3>Stone explainer video</h3>
+          <p><a href="${stone.videoUrl}" target="_blank" rel="noreferrer">Open YouTube video</a></p>
+        </div>
+      </div>
+    ` : "";
     const artworkHtml = artwork ? `
       <div class="artwork-card">
         <div class="artwork-media">${artwork.imageUrl ? `<img src="${artwork.imageUrl}" alt="${artwork.title}">` : stoneSvg(stone.svg)}</div>
@@ -1227,7 +1289,7 @@ function renderTab(stone) {
       </div>
     ` : "";
 
-    tabPanel.innerHTML = `${artworkHtml}${renderCards(stone.art)}`;
+    tabPanel.innerHTML = `${artworkHtml}${videoHtml}${renderCards(stone.art)}`;
   }
 
   if (activeTab === "life") {

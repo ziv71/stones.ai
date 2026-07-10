@@ -8,10 +8,30 @@ import numpy as np
 import tensorflow as tf
 
 
+def resolve_dataset_root(data_dir):
+    candidate = os.path.abspath(os.path.expanduser(str(data_dir or "")))
+    if not candidate:
+        candidate = os.path.abspath(DEFAULT_DATA_DIR)
+
+    if all(os.path.isdir(os.path.join(candidate, split_name)) for split_name in ["train", "val", "test"]):
+        return candidate
+
+    for alternate in [
+        os.path.join(candidate, "datasets"),
+        os.path.join(candidate, "rock-classification"),
+        os.path.join(candidate, "dataset"),
+    ]:
+        if all(os.path.isdir(os.path.join(alternate, split_name)) for split_name in ["train", "val", "test"]):
+            return alternate
+
+    return candidate
+
+
 def build_dataset_splits(data_dir, img_size, batch_size, seed=123):
-    train_dir = os.path.join(data_dir, "train")
-    val_dir = os.path.join(data_dir, "val")
-    test_dir = os.path.join(data_dir, "test")
+    dataset_root = resolve_dataset_root(data_dir)
+    train_dir = os.path.join(dataset_root, "train")
+    val_dir = os.path.join(dataset_root, "val")
+    test_dir = os.path.join(dataset_root, "test")
 
     if not os.path.isdir(train_dir) or not os.path.isdir(val_dir) or not os.path.isdir(test_dir):
         raise FileNotFoundError(
@@ -59,7 +79,7 @@ except ImportError:
 
 
 KAGGLE_DATASET = "salmaneunus/rock-classification"
-DEFAULT_DATA_DIR = "datasets/rock-classification"
+DEFAULT_DATA_DIR = "datasets"
 DEFAULT_MODEL_DIR = "model/rock_classifier"
 DEFAULT_CLASS_LABELS = ["granite", "basalt", "marble", "sandstone", "limestone", "slate"]
 
@@ -218,10 +238,12 @@ def main():
     parser.add_argument("--tfjs", action="store_true", help="Export the trained model to TFJS format")
     args = parser.parse_args()
 
-    if args.download:
-        download_kaggle_dataset(args.data_dir)
+    data_dir = resolve_dataset_root(args.data_dir)
 
-    train_ds, val_ds, test_ds, class_names = build_dataset_splits(args.data_dir, args.img_size, args.batch_size)
+    if args.download:
+        download_kaggle_dataset(data_dir)
+
+    train_ds, val_ds, test_ds, class_names = build_dataset_splits(data_dir, args.img_size, args.batch_size)
     model = build_model((args.img_size, args.img_size, 3), len(class_names), args.base_model)
     model.summary()
 

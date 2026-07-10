@@ -30,6 +30,15 @@ const stones = [
       ["Sustainable future", "Reused granite can avoid new quarry damage and keep material in circulation."]
     ],
     svg: "granite",
+    videoUrl: "https://www.youtube.com/watch?v=_SkZTIrR0-U",
+    artwork: {
+      title: "Cape Ann Granite",
+      artist: "Edward Hopper",
+      year: "1928",
+      imageUrl: "https://upload.wikimedia.org/wikipedia/commons/a/a4/Cape_Ann_Granite%2C_by_Edward_Hopper.png",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Cape_Ann_Granite,_by_Edward_Hopper.png",
+      caption: "Edward Hopper, 'Cape Ann Granite' (1928) — public domain image on Wikimedia Commons."
+    },
     accentColor: "#a8b0b4",
     softColor: "rgba(168, 176, 180, 0.14)",
     glowColor: "rgba(176, 186, 190, 0.12)",
@@ -68,6 +77,15 @@ const stones = [
       ["Design reuse", "Basalt can become tiles, aggregate, sculpture, or landscape material."]
     ],
     svg: "basalt",
+    videoUrl: "https://www.youtube.com/watch?v=7dH4iW9QSq4",
+    artwork: {
+      title: "Hadad (illustration)",
+      artist: "Jewish Encyclopedia (source)",
+      year: "c.1905",
+      imageUrl: "https://upload.wikimedia.org/wikipedia/commons/6/6b/Hadad.jpg",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Hadad.jpg",
+      caption: "Public-domain illustration of a basalt statue (Hadad) from Wikimedia Commons."
+    },
     accentColor: "#7a838d",
     softColor: "rgba(122, 131, 141, 0.16)",
     glowColor: "rgba(128, 138, 148, 0.12)",
@@ -106,6 +124,15 @@ const stones = [
       ["Circular use", "Old marble can be recut, repaired, or transformed into mosaics."]
     ],
     svg: "marble",
+    videoUrl: "https://www.youtube.com/watch?v=LHgifUKUqWw",
+    artwork: {
+      title: "Marble sculpture @ MFA",
+      artist: "Thomas Oboe Lee (photo)",
+      year: "2010",
+      imageUrl: "https://upload.wikimedia.org/wikipedia/commons/3/34/Marble_sculpture_%40_MFA.jpg",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Marble_sculpture_@_MFA.jpg",
+      caption: "Photograph of a marble sculpture from the Museum of Fine Arts (CC BY-SA 4.0)."
+    },
     accentColor: "#d8dbd9",
     softColor: "rgba(216, 219, 217, 0.14)",
     glowColor: "rgba(232, 234, 233, 0.14)",
@@ -144,6 +171,15 @@ const stones = [
       ["Careful use", "Builders can use local sandstone while protecting fragile landforms."]
     ],
     svg: "sandstone",
+    videoUrl: "https://www.youtube.com/watch?v=NJdhDBfnMr8",
+    artwork: {
+      title: "Rocky Landscape in the Elbe Sandstone Mountains",
+      artist: "Caspar David Friedrich",
+      year: "1822-1823",
+      imageUrl: "https://upload.wikimedia.org/wikipedia/commons/c/c1/Rocky_Landscape_in_the_Elbe_Sandstone_Mountains_-_Caspar_David_Friedrich_-_Google_Cultural_Institute.jpg",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Rocky_Landscape_in_the_Elbe_Sandstone_Mountains_-_Caspar_David_Friedrich_-_Google_Cultural_Institute.jpg",
+      caption: "Caspar David Friedrich, landscape showing Elbe sandstone formations (public-domain reproduction)."
+    },
     accentColor: "#ad8f7d",
     softColor: "rgba(173, 143, 125, 0.14)",
     glowColor: "rgba(200, 173, 148, 0.12)",
@@ -182,12 +218,68 @@ const stones = [
       ["Modern challenge", "Its role in cement makes careful material choices important."]
     ],
     svg: "limestone",
+    videoUrl: "https://www.youtube.com/watch?v=0Y6vH4UQymQ",
+    artwork: {
+      title: "Limestone Mountains of Sarawak, Borneo",
+      artist: "Marianne North",
+      year: "1876",
+      imageUrl: "https://upload.wikimedia.org/wikipedia/commons/f/fc/Marianne_North_%281830-1890%29_-_Limestone_Mountains_of_Sarawak%2C_Borneo_-_MN328_-_Marianne_North_Gallery.jpg",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Marianne_North_(1830-1890)_-_Limestone_Mountains_of_Sarawak,_Borneo_-_MN328_-_Marianne_North_Gallery.jpg",
+      caption: "Marianne North, painting of limestone karst in Borneo (public-domain reproduction)."
+    },
     accentColor: "#c3beb3",
     softColor: "rgba(195, 190, 179, 0.14)",
     glowColor: "rgba(220, 216, 206, 0.12)",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Rock-cut_basin_forms.JPG/500px-Rock-cut_basin_forms.JPG",
     imageSourceUrl: "https://commons.wikimedia.org/wiki/File:Rock-cut_basin_forms.JPG",
     imageCaption: "Limestone rock basin, Wikimedia Commons."
+  },
+  {
+    id: "slate",
+    name: "Slate",
+    category: "Metamorphic rock",
+    colors: "Blue-gray, green, black, purple-gray",
+    texture: "Flat sheets, fine grain",
+    formation: "Shale changed by low-grade metamorphism",
+    found: "Old mountain belts and folded sediments",
+    hardness: "Medium",
+    eco: 29,
+    ecoLabel: "Lower impact when durable",
+    confidence: 90,
+    signature: { brightness: 0.25, saturation: 0.23, warmth: 0.3, contrast: 0.34, edge: 0.56 },
+    fact: "Slate splits into thin sheets, which made it useful for roofs and writing tablets.",
+    ecology: [
+      "Long-lasting slate roofs can reduce replacement waste over decades.",
+      "Quarries still need land restoration and careful water management.",
+      "Using reclaimed slate tiles preserves embodied energy and historic material."
+    ],
+    art: [
+      "Ideal for roof patterns, engraved signs, drawing tablets, and dark display bases.",
+      "Sheet-like cleavage inspires layered paper art, relief maps, and architectural cladding.",
+      "Broken slate can become garden labels, mosaics, or textured wall panels."
+    ],
+    life: [
+      ["Mud to shale", "Fine mud settles, compacts, and becomes shale."],
+      ["Mountain pressure", "Pressure changes the shale into slate with strong flat cleavage."],
+      ["Split sheets", "Craftspeople separate it into thin durable layers."],
+      ["Reuse", "Old tiles can be salvaged for roofs, gardens, and art projects."]
+    ],
+    svg: "slate",
+    videoUrl: "https://www.youtube.com/watch?v=4YntG9ZYM3k",
+    artwork: {
+      title: "Slate Quarries",
+      artist: "John Crome",
+      year: "1802-1805",
+      imageUrl: "https://upload.wikimedia.org/wikipedia/commons/6/6e/John_Crome_%281768-1821%29_-_Slate_Quarries_-_NG1037_-_Tate.jpg",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:John_Crome_(1768-1821)_-_Slate_Quarries_-_NG1037_-_Tate.jpg",
+      caption: "John Crome, 'Slate Quarries' — public-domain painting showing slate landscapes."
+    },
+    accentColor: "#7f8790",
+    softColor: "rgba(127, 135, 144, 0.14)",
+    glowColor: "rgba(151, 159, 169, 0.12)",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/a/af/SlateUSGOV.jpg",
+    imageSourceUrl: "https://commons.wikimedia.org/wiki/File:SlateUSGOV.jpg",
+    imageCaption: "Slate rock, Wikimedia Commons."
   }
 ];
 
@@ -336,6 +428,7 @@ let selectedStone = stones[0];
 let selectedImage = "";
 let activeTab = "about";
 let activePage = "scanPage";
+let currentImageAnalysisToken = 0;
 
 function showPage(pageId, options = { scroll: true }) {
   activePage = pageId;
@@ -495,12 +588,17 @@ function selectStone(id) {
   emptyState.style.display = "none";
   updateSignalGrid(selectedStone.signature);
   scanStatus.textContent = "Sample loaded";
+  scanButton.disabled = false;
+  scanButton.textContent = "Scan Stone";
   renderSamples();
   showPage("scanPage");
 }
 
+let currentImageAnalysisToken = 0;
+
 // Remove background from image to isolate the rock
 async function removeBackground(imageSrc) {
+
   return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
@@ -633,76 +731,148 @@ function featherMask(mask, width, height) {
 }
 
 function chooseUpload(file) {
-  if (!file || !file.type.startsWith("image/")) return;
+  if (!file) return;
+  const looksLikeImage = file.type?.startsWith("image/") || /\.(png|jpe?g|webp|gif|bmp)$/i.test(file.name || "");
+  if (!looksLikeImage) {
+    scanStatus.textContent = "Please choose a real image file.";
+    return;
+  }
+
+  scanStatus.textContent = "Reading image...";
+  if (typeof URL !== "undefined" && typeof URL.createObjectURL === "function") {
+    const objectUrl = URL.createObjectURL(file);
+    loadScannedImage(objectUrl);
+    return;
+  }
+
   const reader = new FileReader();
-  reader.onload = () => loadScannedImage(reader.result);
+  reader.onload = async () => {
+    try {
+      await validateImageSource(reader.result);
+      loadScannedImage(reader.result);
+    } catch (error) {
+      scanStatus.textContent = "The selected file is not a valid image.";
+    }
+  };
+  reader.onerror = () => {
+    scanStatus.textContent = "The image could not be read. Try another file.";
+  };
   reader.readAsDataURL(file);
 }
 
 function loadScannedImage(src) {
   if (!src) return;
+  const analysisToken = ++currentImageAnalysisToken;
+  
   scanStatus.textContent = "Processing image...";
   
   removeBackground(src).then((processedSrc) => {
+    if (analysisToken !== currentImageAnalysisToken) return;
+    
     selectedImage = processedSrc;
     previewImage.src = selectedImage;
     previewImage.style.display = "block";
     emptyState.style.display = "none";
-    analyzeImageSignature(selectedImage).then(({ signature, quality, mlLabels }) => {
-      const match = matchStone(signature, mlLabels, quality);
-      const adjustedConfidence = Math.max(24, Math.min(95, match.confidence));
-      const fallbackStone = stones.find((stone) => stone.id === match.topCandidates?.[0]?.id) || match.secondChoice || stones[0];
-      const shouldShowPrediction = Boolean(match.topCandidates?.length);
-      selectedStone = shouldShowPrediction
-        ? {
-            ...(match.stone || fallbackStone),
-            confidence: adjustedConfidence,
-            matchedSignature: signature,
-            secondChoice: match.secondChoice,
-            mlLabels,
-            quality,
-            topCandidates: match.topCandidates,
-            explanation: match.explanation,
-            isUncertain: !match.isReliable || quality.score < 35,
-            isUnknown: false
-          }
-        : createUncertainResult(match, signature, quality, mlLabels);
-      updateSignalGrid(signature);
-      renderQualityPanel(quality);
-      scanStatus.textContent = quality.label;
-      renderSamples();
-    });
+    
+    previewImage.onerror = () => {
+      if (analysisToken !== currentImageAnalysisToken) return;
+      scanStatus.textContent = "The image could not be loaded. Try a different file.";
+      previewImage.style.display = "none";
+      emptyState.style.display = "grid";
+      scanButton.disabled = false;
+      scanButton.textContent = "Scan Stone";
+    };
+    
+    scanButton.disabled = true;
+    scanButton.textContent = "Analyzing...";
+    scanStatus.textContent = "Analyzing image...";
+    
+    analyzeImageSignature(selectedImage)
+      .then(({ signature, quality, mlLabels }) => {
+        if (analysisToken !== currentImageAnalysisToken) return;
+        const match = matchStone(signature, mlLabels, quality);
+        const adjustedConfidence = Math.max(24, Math.min(95, match.confidence));
+        const fallbackStone = stones.find((stone) => stone.id === match.topCandidates?.[0]?.id) || match.secondChoice || stones[0];
+        const shouldShowPrediction = Boolean(match.topCandidates?.length);
+        selectedStone = shouldShowPrediction
+          ? {
+              ...(match.stone || fallbackStone),
+              confidence: adjustedConfidence,
+              matchedSignature: signature,
+              secondChoice: match.secondChoice,
+              mlLabels,
+              quality,
+              topCandidates: match.topCandidates,
+              explanation: match.explanation,
+              isUncertain: !match.isReliable || quality.score < 35,
+              isUnknown: false
+            }
+          : createUncertainResult(match, signature, quality, mlLabels);
+        updateSignalGrid(signature);
+        renderQualityPanel(quality);
+        scanStatus.textContent = quality.label;
+        renderSamples();
+      })
+      .catch(() => {
+        if (analysisToken !== currentImageAnalysisToken) return;
+        scanStatus.textContent = "The selected image could not be analyzed.";
+      })
+      .finally(() => {
+        if (analysisToken === currentImageAnalysisToken) {
+          scanButton.disabled = false;
+          scanButton.textContent = "Scan Stone";
+        }
+      });
   }).catch(() => {
-    // If background removal fails, proceed with original image
+    if (analysisToken !== currentImageAnalysisToken) return;
+    // If background removal fails, use original and continue
     selectedImage = src;
     previewImage.src = selectedImage;
     previewImage.style.display = "block";
     emptyState.style.display = "none";
-    analyzeImageSignature(selectedImage).then(({ signature, quality, mlLabels }) => {
-      const match = matchStone(signature, mlLabels, quality);
-      const adjustedConfidence = Math.max(24, Math.min(95, match.confidence));
-      const fallbackStone = stones.find((stone) => stone.id === match.topCandidates?.[0]?.id) || match.secondChoice || stones[0];
-      const shouldShowPrediction = Boolean(match.topCandidates?.length);
-      selectedStone = shouldShowPrediction
-        ? {
-            ...(match.stone || fallbackStone),
-            confidence: adjustedConfidence,
-            matchedSignature: signature,
-            secondChoice: match.secondChoice,
-            mlLabels,
-            quality,
-            topCandidates: match.topCandidates,
-            explanation: match.explanation,
-            isUncertain: !match.isReliable || quality.score < 35,
-            isUnknown: false
-          }
-        : createUncertainResult(match, signature, quality, mlLabels);
-      updateSignalGrid(signature);
-      renderQualityPanel(quality);
-      scanStatus.textContent = quality.label;
-      renderSamples();
-    });
+    
+    scanButton.disabled = true;
+    scanButton.textContent = "Analyzing...";
+    scanStatus.textContent = "Analyzing image...";
+    
+    analyzeImageSignature(selectedImage)
+      .then(({ signature, quality, mlLabels }) => {
+        if (analysisToken !== currentImageAnalysisToken) return;
+        const match = matchStone(signature, mlLabels, quality);
+        const adjustedConfidence = Math.max(24, Math.min(95, match.confidence));
+        const fallbackStone = stones.find((stone) => stone.id === match.topCandidates?.[0]?.id) || match.secondChoice || stones[0];
+        const shouldShowPrediction = Boolean(match.topCandidates?.length);
+        selectedStone = shouldShowPrediction
+          ? {
+              ...(match.stone || fallbackStone),
+              confidence: adjustedConfidence,
+              matchedSignature: signature,
+              secondChoice: match.secondChoice,
+              mlLabels,
+              quality,
+              topCandidates: match.topCandidates,
+              explanation: match.explanation,
+              isUncertain: !match.isReliable || quality.score < 35,
+              isUnknown: false
+            }
+          : createUncertainResult(match, signature, quality, mlLabels);
+        updateSignalGrid(signature);
+        renderQualityPanel(quality);
+        scanStatus.textContent = quality.label;
+        renderSamples();
+      })
+      .catch(() => {
+        if (analysisToken !== currentImageAnalysisToken) return;
+        scanStatus.textContent = "The selected image could not be analyzed.";
+      })
+      .finally(() => {
+        if (analysisToken === currentImageAnalysisToken) {
+          scanButton.disabled = false;
+          scanButton.textContent = "Scan Stone";
+        }
+      });
   });
+}
 }
 
 function loadImageUrl(url) {
@@ -711,10 +881,31 @@ function loadImageUrl(url) {
     scanStatus.textContent = "Enter a valid image URL or paste a stone photo.";
     return;
   }
+
   let source = value;
-  if (!/^https?:\/\//i.test(source)) {
+  if (source.startsWith("data:image/")) {
+    loadScannedImage(source);
+    urlInput.value = "";
+    return;
+  }
+  if (!/^https?:\/\//i.test(source) && !/^\/\//.test(source)) {
+    if (!/^[a-z0-9.-]+\.[a-z]{2,}(?:\/|$)/i.test(source) && !source.includes("/")) {
+      scanStatus.textContent = "Enter a valid image URL or paste a stone photo.";
+      return;
+    }
     source = `https://${source}`;
   }
+
+  try {
+    const parsedUrl = new URL(source);
+    if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+      throw new Error("Unsupported protocol");
+    }
+  } catch (error) {
+    scanStatus.textContent = "Enter a valid image URL or paste a stone photo.";
+    return;
+  }
+
   scanStatus.textContent = "Loading image from URL...";
   urlInput.value = "";
   loadScannedImage(source);
@@ -1216,6 +1407,11 @@ function scanStone() {
     selectStone(selectedStone.id);
   }
 
+  if (scanButton.disabled) {
+    scanStatus.textContent = "Analyzing image...";
+    return;
+  }
+
   scanStatus.textContent = "Scanning";
   resultEmpty.classList.remove("hidden");
   resultCard.classList.add("hidden");
@@ -1357,6 +1553,14 @@ function renderTab(stone) {
 
   if (activeTab === "art") {
     const artwork = stone.artwork || null;
+    const videoHtml = stone.videoUrl ? `
+      <div class="artwork-card">
+        <div class="artwork-meta">
+          <h3>Stone explainer video</h3>
+          <p><a href="${stone.videoUrl}" target="_blank" rel="noreferrer">Open YouTube video</a></p>
+        </div>
+      </div>
+    ` : "";
     const artworkHtml = artwork ? `
       <div class="artwork-card">
         <div class="artwork-media">${artwork.imageUrl ? `<img src="${artwork.imageUrl}" alt="${artwork.title}">` : stoneSvg(stone.svg)}</div>
@@ -1369,7 +1573,7 @@ function renderTab(stone) {
       </div>
     ` : "";
 
-    tabPanel.innerHTML = `${artworkHtml}${renderCards(stone.art)}`;
+    tabPanel.innerHTML = `${artworkHtml}${videoHtml}${renderCards(stone.art)}`;
   }
 
   if (activeTab === "life") {
@@ -1481,7 +1685,10 @@ dropZone.addEventListener("dragleave", () => {
 dropZone.addEventListener("drop", (event) => {
   event.preventDefault();
   scanFrame.classList.remove("is-scanning");
-  chooseUpload(event.dataTransfer.files[0]);
+  const droppedImage = event.dataTransfer?.files?.[0] || Array.from(event.dataTransfer?.items || [])
+    .map((item) => item.getAsFile())
+    .find(Boolean);
+  chooseUpload(droppedImage);
 });
 
 document.querySelectorAll(".tab").forEach((button) => {

@@ -873,7 +873,7 @@ function loadScannedImage(src) {
       });
   });
 }
-}
+
 
 function loadImageUrl(url) {
   const value = String(url || "").trim();

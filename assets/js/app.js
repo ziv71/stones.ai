@@ -428,6 +428,7 @@ let selectedStone = stones[0];
 let selectedImage = "";
 let activeTab = "about";
 let activePage = "scanPage";
+let currentImageAnalysisToken = 0;
 
 function showPage(pageId, options = { scroll: true }) {
   activePage = pageId;
@@ -587,8 +588,19 @@ function selectStone(id) {
   emptyState.style.display = "none";
   updateSignalGrid(selectedStone.signature);
   scanStatus.textContent = "Sample loaded";
+  scanButton.disabled = false;
+  scanButton.textContent = "Scan Stone";
   renderSamples();
   showPage("scanPage");
+}
+
+function validateImageSource(src) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Invalid image source"));
+    image.src = src;
+  });
 }
 
 function chooseUpload(file) {
@@ -607,7 +619,14 @@ function chooseUpload(file) {
   }
 
   const reader = new FileReader();
-  reader.onload = () => loadScannedImage(reader.result);
+  reader.onload = async () => {
+    try {
+      await validateImageSource(reader.result);
+      loadScannedImage(reader.result);
+    } catch (error) {
+      scanStatus.textContent = "The selected file is not a valid image.";
+    }
+  };
   reader.onerror = () => {
     scanStatus.textContent = "The image could not be read. Try another file.";
   };
@@ -616,39 +635,59 @@ function chooseUpload(file) {
 
 function loadScannedImage(src) {
   if (!src) return;
+  const analysisToken = ++currentImageAnalysisToken;
   selectedImage = src;
   previewImage.src = selectedImage;
   previewImage.style.display = "block";
   emptyState.style.display = "none";
   previewImage.onerror = () => {
+    if (analysisToken !== currentImageAnalysisToken) return;
     scanStatus.textContent = "The image could not be loaded. Try a different file.";
     previewImage.style.display = "none";
     emptyState.style.display = "grid";
+    scanButton.disabled = false;
+    scanButton.textContent = "Scan Stone";
   };
-  analyzeImageSignature(selectedImage).then(({ signature, quality, mlLabels }) => {
-    const match = matchStone(signature, mlLabels, quality);
-    const adjustedConfidence = Math.max(24, Math.min(95, match.confidence));
-    const fallbackStone = stones.find((stone) => stone.id === match.topCandidates?.[0]?.id) || match.secondChoice || stones[0];
-    const shouldShowPrediction = Boolean(match.topCandidates?.length);
-    selectedStone = shouldShowPrediction
-      ? {
-          ...(match.stone || fallbackStone),
-          confidence: adjustedConfidence,
-          matchedSignature: signature,
-          secondChoice: match.secondChoice,
-          mlLabels,
-          quality,
-          topCandidates: match.topCandidates,
-          explanation: match.explanation,
-          isUncertain: !match.isReliable || quality.score < 35,
-          isUnknown: false
-        }
-      : createUncertainResult(match, signature, quality, mlLabels);
-    updateSignalGrid(signature);
-    renderQualityPanel(quality);
-    scanStatus.textContent = quality.label;
-    renderSamples();
-  });
+  scanButton.disabled = true;
+  scanButton.textContent = "Analyzing...";
+  scanStatus.textContent = "Analyzing image...";
+
+  analyzeImageSignature(selectedImage)
+    .then(({ signature, quality, mlLabels }) => {
+      if (analysisToken !== currentImageAnalysisToken) return;
+      const match = matchStone(signature, mlLabels, quality);
+      const adjustedConfidence = Math.max(24, Math.min(95, match.confidence));
+      const fallbackStone = stones.find((stone) => stone.id === match.topCandidates?.[0]?.id) || match.secondChoice || stones[0];
+      const shouldShowPrediction = Boolean(match.topCandidates?.length);
+      selectedStone = shouldShowPrediction
+        ? {
+            ...(match.stone || fallbackStone),
+            confidence: adjustedConfidence,
+            matchedSignature: signature,
+            secondChoice: match.secondChoice,
+            mlLabels,
+            quality,
+            topCandidates: match.topCandidates,
+            explanation: match.explanation,
+            isUncertain: !match.isReliable || quality.score < 35,
+            isUnknown: false
+          }
+        : createUncertainResult(match, signature, quality, mlLabels);
+      updateSignalGrid(signature);
+      renderQualityPanel(quality);
+      scanStatus.textContent = quality.label;
+      renderSamples();
+    })
+    .catch(() => {
+      if (analysisToken !== currentImageAnalysisToken) return;
+      scanStatus.textContent = "The selected image could not be analyzed.";
+    })
+    .finally(() => {
+      if (analysisToken === currentImageAnalysisToken) {
+        scanButton.disabled = false;
+        scanButton.textContent = "Scan Stone";
+      }
+    });
 }
 
 function loadImageUrl(url) {
@@ -657,15 +696,31 @@ function loadImageUrl(url) {
     scanStatus.textContent = "Enter a valid image URL or paste a stone photo.";
     return;
   }
+
   let source = value;
   if (source.startsWith("data:image/")) {
     loadScannedImage(source);
     urlInput.value = "";
     return;
   }
-  if (!/^https?:\/\//i.test(source)) {
+  if (!/^https?:\/\//i.test(source) && !/^\/\//.test(source)) {
+    if (!/^[a-z0-9.-]+\.[a-z]{2,}(?:\/|$)/i.test(source) && !source.includes("/")) {
+      scanStatus.textContent = "Enter a valid image URL or paste a stone photo.";
+      return;
+    }
     source = `https://${source}`;
   }
+
+  try {
+    const parsedUrl = new URL(source);
+    if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+      throw new Error("Unsupported protocol");
+    }
+  } catch (error) {
+    scanStatus.textContent = "Enter a valid image URL or paste a stone photo.";
+    return;
+  }
+
   scanStatus.textContent = "Loading image from URL...";
   urlInput.value = "";
   loadScannedImage(source);
@@ -1165,6 +1220,11 @@ function clamp(value, min = 0, max = 1) {
 function scanStone() {
   if (!selectedImage) {
     selectStone(selectedStone.id);
+  }
+
+  if (scanButton.disabled) {
+    scanStatus.textContent = "Analyzing image...";
+    return;
   }
 
   scanStatus.textContent = "Scanning";

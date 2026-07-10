@@ -499,6 +499,139 @@ function selectStone(id) {
   showPage("scanPage");
 }
 
+// Remove background from image to isolate the rock
+async function removeBackground(imageSrc) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+      
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      
+      // Detect background using edge detection and color analysis
+      const edges = detectEdges(data, canvas.width, canvas.height);
+      const mainObjectMask = findMainObject(data, edges, canvas.width, canvas.height);
+      
+      // Apply mask with feathering for smooth edges
+      for (let i = 0; i < data.length; i += 4) {
+        const pixelIndex = i / 4;
+        const maskValue = mainObjectMask[pixelIndex] || 0;
+        data[i + 3] = Math.round(data[i + 3] * maskValue); // Apply alpha
+      }
+      
+      ctx.putImageData(imageData, 0, 0);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.onerror = () => resolve(imageSrc);
+    img.src = imageSrc;
+  });
+}
+
+// Detect edges in the image
+function detectEdges(data, width, height) {
+  const edges = new Float32Array(width * height);
+  
+  for (let y = 1; y < height - 1; y++) {
+    for (let x = 1; x < width - 1; x++) {
+      const idx = (y * width + x) * 4;
+      
+      // Sobel operator for edge detection
+      const gx = 
+        -data[((y-1)*width + (x-1))*4] - 2*data[((y)*width + (x-1))*4] - data[((y+1)*width + (x-1))*4] +
+        data[((y-1)*width + (x+1))*4] + 2*data[((y)*width + (x+1))*4] + data[((y+1)*width + (x+1))*4];
+      
+      const gy = 
+        -data[((y-1)*width + (x-1))*4] - 2*data[((y-1)*width + (x))*4] - data[((y-1)*width + (x+1))*4] +
+        data[((y+1)*width + (x-1))*4] + 2*data[((y+1)*width + (x))*4] + data[((y+1)*width + (x+1))*4];
+      
+      edges[y * width + x] = Math.sqrt(gx * gx + gy * gy);
+    }
+  }
+  return edges;
+}
+
+// Find main object region
+function findMainObject(data, edges, width, height) {
+  const mask = new Float32Array(width * height);
+  
+  // Detect background color from corners
+  const cornerSamples = [
+    data.slice(0, 4),
+    data.slice((width - 1) * 4, (width - 1) * 4 + 4),
+    data.slice((height - 1) * width * 4, (height - 1) * width * 4 + 4),
+    data.slice((height - 1) * width * 4 + (width - 1) * 4, (height - 1) * width * 4 + (width - 1) * 4 + 4)
+  ];
+  
+  const bgColor = {
+    r: Math.round((cornerSamples[0][0] + cornerSamples[1][0] + cornerSamples[2][0] + cornerSamples[3][0]) / 4),
+    g: Math.round((cornerSamples[0][1] + cornerSamples[1][1] + cornerSamples[2][1] + cornerSamples[3][1]) / 4),
+    b: Math.round((cornerSamples[0][2] + cornerSamples[1][2] + cornerSamples[2][2] + cornerSamples[3][2]) / 4)
+  };
+  
+  // Create mask based on color similarity and edges
+  for (let i = 0; i < data.length; i += 4) {
+    const pixelIdx = i / 4;
+    const x = pixelIdx % width;
+    const y = Math.floor(pixelIdx / width);
+    
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+    const a = data[i + 3];
+    
+    // Color distance from background
+    const colorDist = Math.sqrt(
+      Math.pow(r - bgColor.r, 2) + 
+      Math.pow(g - bgColor.g, 2) + 
+      Math.pow(b - bgColor.b, 2)
+    );
+    
+    // Edge strength
+    const edgeStrength = edges[pixelIdx] || 0;
+    
+    // Combine: pixels that are different from background or near edges are kept
+    const isForeground = colorDist > 30 || edgeStrength > 20;
+    mask[pixelIdx] = isForeground ? 1 : (colorDist > 15 ? 0.7 : 0);
+  }
+  
+  // Feather the edges
+  return featherMask(mask, width, height);
+}
+
+// Smooth edges with feathering
+function featherMask(mask, width, height) {
+  const feathered = new Float32Array(mask.length);
+  const radius = 3;
+  
+  for (let i = 0; i < mask.length; i++) {
+    const x = i % width;
+    const y = Math.floor(i / width);
+    let sum = 0;
+    let count = 0;
+    
+    for (let dy = -radius; dy <= radius; dy++) {
+      for (let dx = -radius; dx <= radius; dx++) {
+        const nx = x + dx;
+        const ny = y + dy;
+        if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+          sum += mask[ny * width + nx];
+          count++;
+        }
+      }
+    }
+    
+    feathered[i] = Math.max(mask[i], sum / count);
+  }
+  
+  return feathered;
+}
+
 function chooseUpload(file) {
   if (!file || !file.type.startsWith("image/")) return;
   const reader = new FileReader();
@@ -508,33 +641,67 @@ function chooseUpload(file) {
 
 function loadScannedImage(src) {
   if (!src) return;
-  selectedImage = src;
-  previewImage.src = selectedImage;
-  previewImage.style.display = "block";
-  emptyState.style.display = "none";
-  analyzeImageSignature(selectedImage).then(({ signature, quality, mlLabels }) => {
-    const match = matchStone(signature, mlLabels, quality);
-    const adjustedConfidence = Math.max(24, Math.min(95, match.confidence));
-    const fallbackStone = stones.find((stone) => stone.id === match.topCandidates?.[0]?.id) || match.secondChoice || stones[0];
-    const shouldShowPrediction = Boolean(match.topCandidates?.length);
-    selectedStone = shouldShowPrediction
-      ? {
-          ...(match.stone || fallbackStone),
-          confidence: adjustedConfidence,
-          matchedSignature: signature,
-          secondChoice: match.secondChoice,
-          mlLabels,
-          quality,
-          topCandidates: match.topCandidates,
-          explanation: match.explanation,
-          isUncertain: !match.isReliable || quality.score < 35,
-          isUnknown: false
-        }
-      : createUncertainResult(match, signature, quality, mlLabels);
-    updateSignalGrid(signature);
-    renderQualityPanel(quality);
-    scanStatus.textContent = quality.label;
-    renderSamples();
+  scanStatus.textContent = "Processing image...";
+  
+  removeBackground(src).then((processedSrc) => {
+    selectedImage = processedSrc;
+    previewImage.src = selectedImage;
+    previewImage.style.display = "block";
+    emptyState.style.display = "none";
+    analyzeImageSignature(selectedImage).then(({ signature, quality, mlLabels }) => {
+      const match = matchStone(signature, mlLabels, quality);
+      const adjustedConfidence = Math.max(24, Math.min(95, match.confidence));
+      const fallbackStone = stones.find((stone) => stone.id === match.topCandidates?.[0]?.id) || match.secondChoice || stones[0];
+      const shouldShowPrediction = Boolean(match.topCandidates?.length);
+      selectedStone = shouldShowPrediction
+        ? {
+            ...(match.stone || fallbackStone),
+            confidence: adjustedConfidence,
+            matchedSignature: signature,
+            secondChoice: match.secondChoice,
+            mlLabels,
+            quality,
+            topCandidates: match.topCandidates,
+            explanation: match.explanation,
+            isUncertain: !match.isReliable || quality.score < 35,
+            isUnknown: false
+          }
+        : createUncertainResult(match, signature, quality, mlLabels);
+      updateSignalGrid(signature);
+      renderQualityPanel(quality);
+      scanStatus.textContent = quality.label;
+      renderSamples();
+    });
+  }).catch(() => {
+    // If background removal fails, proceed with original image
+    selectedImage = src;
+    previewImage.src = selectedImage;
+    previewImage.style.display = "block";
+    emptyState.style.display = "none";
+    analyzeImageSignature(selectedImage).then(({ signature, quality, mlLabels }) => {
+      const match = matchStone(signature, mlLabels, quality);
+      const adjustedConfidence = Math.max(24, Math.min(95, match.confidence));
+      const fallbackStone = stones.find((stone) => stone.id === match.topCandidates?.[0]?.id) || match.secondChoice || stones[0];
+      const shouldShowPrediction = Boolean(match.topCandidates?.length);
+      selectedStone = shouldShowPrediction
+        ? {
+            ...(match.stone || fallbackStone),
+            confidence: adjustedConfidence,
+            matchedSignature: signature,
+            secondChoice: match.secondChoice,
+            mlLabels,
+            quality,
+            topCandidates: match.topCandidates,
+            explanation: match.explanation,
+            isUncertain: !match.isReliable || quality.score < 35,
+            isUnknown: false
+          }
+        : createUncertainResult(match, signature, quality, mlLabels);
+      updateSignalGrid(signature);
+      renderQualityPanel(quality);
+      scanStatus.textContent = quality.label;
+      renderSamples();
+    });
   });
 }
 

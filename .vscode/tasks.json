@@ -1,0 +1,257 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Verify dataset importer",
+			"type": "shell",
+			"command": "\"c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe\" -m unittest tests.test_import_dataset",
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Download rock dataset",
+			"type": "shell",
+			"command": "curl -L -o rock-classifier.zip https://www.kaggle.com/api/v1/datasets/download/asgharqamberrizvi/rock-classifier",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Download rock dataset",
+			"type": "shell",
+			"command": "powershell -NoProfile -Command \"Invoke-WebRequest -Uri 'https://www.kaggle.com/api/v1/datasets/download/asgharqamberrizvi/rock-classifier' -OutFile 'rock-classifier.zip'\"",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Extract archive bundle",
+			"type": "shell",
+			"command": "powershell -NoProfile -Command \"Expand-Archive -Path 'stone_app.rar' -DestinationPath 'extracted_app' -Force\"",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Extract archive bundle",
+			"type": "shell",
+			"command": "7z x stone_app.rar -oextracted_app -y",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Populate dataset folders",
+			"type": "shell",
+			"command": "\"c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe\" populate_dataset.py",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Count dataset images",
+			"type": "shell",
+			"command": "\"c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe\" count_dataset.py",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Import downloaded archive dataset",
+			"type": "shell",
+			"command": "\"c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe\" import_dataset.py \"C:/Users/User/Desktop/stones.ai/datasets/archive\" --output-dir \"C:/Users/User/Desktop/stones.ai/datasets\"",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Count imported dataset",
+			"type": "shell",
+			"command": "\"c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe\" count_dataset.py",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Train stone classifier",
+			"type": "shell",
+			"command": "\"c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe\" train_rock_classifier.py --data-dir \"C:/Users/User/Desktop/stones.ai/datasets\" --model-dir \"C:/Users/User/Desktop/stones.ai/model/rock_classifier\" --img-size 224 --batch-size 16 --epochs 8 --base-model efficientnetb0",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Train stone classifier",
+			"type": "shell",
+			"command": "\"c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe\" train_rock_classifier.py --data-dir \"C:/Users/User/Desktop/stones.ai/datasets\" --model-dir \"C:/Users/User/Desktop/stones.ai/model/rock_classifier\" --img-size 224 --batch-size 16 --epochs 8 --base-model efficientnetb0",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Train stone classifier",
+			"type": "shell",
+			"command": "\"c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe\" train_rock_classifier.py --data-dir \"C:/Users/User/Desktop/stones.ai/datasets\" --model-dir \"C:/Users/User/Desktop/stones.ai/model/rock_classifier\" --img-size 224 --batch-size 16 --epochs 3 --base-model efficientnetb0",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Export trained model for web app",
+			"type": "shell",
+			"command": "\"c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe\" -m tensorflowjs.converters.convert --input_format keras --output_format tfjs_graph_model \"C:/Users/User/Desktop/stones.ai/model/rock_classifier/best_rock_classifier.h5\" \"C:/Users/User/Desktop/stones.ai/model/rock_classifier/tfjs\"",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Export trained model for web app",
+			"type": "shell",
+			"command": "\"c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe\" -m tensorflowjs.converters.convert --input_format keras --output_format tfjs_graph_model \"C:/Users/User/Desktop/stones.ai/model/rock_classifier/best_rock_classifier.h5\" \"C:/Users/User/Desktop/stones.ai/model/rock_classifier/tfjs\"",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Convert model to TensorFlow.js",
+			"type": "shell",
+			"command": "\"c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe\" - <<'PY'\nimport tensorflow as tf\nprint(tf.__version__)\nPY",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Check TensorFlow version",
+			"type": "shell",
+			"command": "\"c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe\" check_tf_version.py",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Convert model to TensorFlow.js",
+			"type": "shell",
+			"command": "\"c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe\" convert_model.py",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Convert model to TensorFlow.js",
+			"type": "shell",
+			"command": "\"c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe\" convert_model.py",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Convert model to TensorFlow.js",
+			"type": "shell",
+			"command": "powershell -NoProfile -Command \"& 'c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe' 'c:/Users/User/Desktop/stones.ai/convert_model.py'\"",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Verify numpy version",
+			"type": "shell",
+			"command": "c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe -c \"import numpy; print(numpy.__version__)\"",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Check numpy version",
+			"type": "shell",
+			"command": "c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe check_numpy.py",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Export model to TensorFlow.js",
+			"type": "shell",
+			"command": "c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe export_tfjs.py",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Export model to TensorFlow.js",
+			"type": "shell",
+			"command": "c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe export_tfjs.py",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Inspect TensorFlow.js dependencies",
+			"type": "shell",
+			"command": "c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe check_tfjs_deps.py",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Run export compatibility tests",
+			"type": "shell",
+			"command": "c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe -m pytest -q tests/test_export_tfjs.py",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Run export compatibility tests",
+			"type": "shell",
+			"command": "c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe -m pytest -q tests/test_export_tfjs.py",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Install compatible TensorFlow.js dependencies",
+			"type": "shell",
+			"command": "c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe -m pip install \"tensorflow-estimator==2.21.0\" \"numpy==1.26.4\"",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Install compatible TensorFlow estimator",
+			"type": "shell",
+			"command": "c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe -m pip install \"tensorflow-estimator==2.15.0\" \"numpy==1.26.4\"",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Upgrade TensorFlow.js converter",
+			"type": "shell",
+			"command": "c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe -m pip install --upgrade tensorflowjs",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Export model to TensorFlow.js",
+			"type": "shell",
+			"command": "c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe export_tfjs.py",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Export SavedModel bundle",
+			"type": "shell",
+			"command": "c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe export_tfjs_direct.py",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Export SavedModel bundle",
+			"type": "shell",
+			"command": "c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe export_tfjs_direct.py",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Export Keras model bundle",
+			"type": "shell",
+			"command": "c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe export_tfjs_direct.py",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Check converter package versions",
+			"type": "shell",
+			"command": "c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe -c \"import tensorflowjs, tensorflow_hub, tensorflow as tf; import importlib.metadata as m; print('tensorflowjs', m.version('tensorflowjs')); print('tensorflow_hub', m.version('tensorflow-hub')); print('tensorflow', tf.__version__)\"",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Check converter package versions",
+			"type": "shell",
+			"command": "c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe check_versions.py",
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Install compatible TensorFlow Hub",
+			"type": "shell",
+			"command": "c:/Users/User/Desktop/stones.ai/.venv/Scripts/python.exe -m pip install --upgrade \"tensorflow-hub==0.16.1\" \"tensorflowjs==4.22.0\" \"packaging>=24.0\" \"protobuf>=4.25.3\"",
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}

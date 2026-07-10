@@ -291,11 +291,26 @@ async function loadMobileNetModel() {
   }
 }
 
+function resolveAppAssetUrl(relativePath) {
+  const baseCandidates = [document.baseURI, window.location.href, document.currentScript?.src, `${window.location.origin}/`].filter(Boolean);
+
+  for (const base of baseCandidates) {
+    try {
+      const url = new URL(relativePath, base);
+      return url.href;
+    } catch (error) {
+      continue;
+    }
+  }
+
+  return relativePath;
+}
+
 async function loadStoneClassifierModel() {
   if (typeof tf === "undefined") return;
   try {
-    const modelUrl = new URL("./model/rock_classifier/tfjs/model.json", window.location.href);
-    const labelsUrl = new URL("./model/rock_classifier/tfjs/class_names.txt", window.location.href);
+    const modelUrl = new URL(resolveAppAssetUrl("./model/rock_classifier/tfjs/model.json"));
+    const labelsUrl = new URL(resolveAppAssetUrl("./model/rock_classifier/tfjs/class_names.txt"));
     modelUrl.searchParams.set("v", MODEL_CACHE_VERSION);
     labelsUrl.searchParams.set("v", MODEL_CACHE_VERSION);
     const modelResponse = await fetch(modelUrl.href);

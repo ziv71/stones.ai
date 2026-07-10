@@ -1640,6 +1640,14 @@ h3 {
   text-shadow: 0 2px 22px rgba(0, 0, 0, 0.38);
 }
 
+#projectPage .project-hero h2 .calm-word {
+  color: #b8875c;
+}
+
+#projectPage .project-hero h2 .natural-word {
+  color: #9faf83;
+}
+
 .project-hero,
 .project-card {
   border: 1px solid rgba(151, 137, 116, 0.24);

@@ -1,16 +1,16 @@
 :root {
   --bg: #020303;
-  --panel: rgba(8, 12, 13, 0.82);
-  --panel-2: rgba(15, 24, 26, 0.9);
-  --line: rgba(130, 255, 214, 0.22);
-  --line-hot: rgba(181, 122, 255, 0.6);
-  --text: #f7fffb;
+  --panel: rgba(9, 13, 14, 0.84);
+  --panel-2: rgba(15, 24, 26, 0.94);
+  --line: rgba(117, 255, 210, 0.2);
+  --line-hot: rgba(181, 122, 255, 0.54);
+  --text: #f6fff9;
   --muted: #9fbcb2;
-  --cyan: #75ffd2;
+  --cyan: #7ef7d3;
   --violet: #b57aff;
   --rose: #ff6fb5;
   --amber: #f5c46b;
-  --shadow: 0 28px 90px rgba(0, 0, 0, 0.58);
+  --shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
 }
 
 * {
@@ -24,9 +24,9 @@ body {
   font-family: Rubik, system-ui, sans-serif;
   color: var(--text);
   background:
-    linear-gradient(120deg, rgba(117, 255, 210, 0.14), transparent 30%),
-    linear-gradient(240deg, rgba(181, 122, 255, 0.16), transparent 34%),
-    radial-gradient(circle at 50% 110%, rgba(255, 111, 181, 0.16), transparent 32%),
+    radial-gradient(circle at top left, rgba(117, 255, 210, 0.16), transparent 26%),
+    radial-gradient(circle at 85% 10%, rgba(181, 122, 255, 0.14), transparent 24%),
+    radial-gradient(circle at 50% 110%, rgba(255, 111, 181, 0.12), transparent 30%),
     var(--bg);
 }
 
@@ -71,9 +71,10 @@ a {
 .control-panel,
 .info-strip article {
   border: 1px solid var(--line);
+  border-radius: 24px;
   background:
-    linear-gradient(135deg, rgba(117, 255, 210, 0.07), transparent 42%),
-    linear-gradient(225deg, rgba(181, 122, 255, 0.08), transparent 44%),
+    linear-gradient(135deg, rgba(117, 255, 210, 0.06), transparent 42%),
+    linear-gradient(225deg, rgba(181, 122, 255, 0.06), transparent 44%),
     var(--panel);
   box-shadow: var(--shadow);
   backdrop-filter: blur(18px);
@@ -87,7 +88,6 @@ a {
   min-height: 150px;
   padding: 24px;
   margin-bottom: 18px;
-  clip-path: polygon(2% 0, 100% 0, 98% 86%, 84% 100%, 0 92%);
 }
 
 .eyebrow {
@@ -130,14 +130,13 @@ button,
   place-items: center;
   min-height: 46px;
   border: 1px solid var(--line);
-  background:
-    linear-gradient(135deg, rgba(117, 255, 210, 0.14), rgba(181, 122, 255, 0.12)),
-    rgba(255, 255, 255, 0.04);
-  clip-path: polygon(8% 0, 88% 6%, 100% 42%, 90% 100%, 14% 92%, 0 48%);
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(117, 255, 210, 0.14), rgba(181, 122, 255, 0.12));
   cursor: pointer;
   font-weight: 900;
   text-align: center;
   text-decoration: none;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 
 button:hover,
@@ -147,11 +146,8 @@ button:hover,
 }
 
 .lab-link {
-  border-color: rgba(255, 111, 181, 0.5);
-  background:
-    linear-gradient(135deg, rgba(255, 111, 181, 0.22), rgba(117, 255, 210, 0.13)),
-    rgba(255, 255, 255, 0.04);
-  clip-path: polygon(12% 0, 100% 16%, 88% 100%, 0 86%, 6% 25%);
+  border-color: rgba(255, 111, 181, 0.42);
+  background: linear-gradient(135deg, rgba(255, 111, 181, 0.22), rgba(117, 255, 210, 0.13));
 }
 
 button.active {
@@ -171,7 +167,6 @@ button.active {
   position: relative;
   min-height: calc(100vh - 270px);
   overflow: hidden;
-  clip-path: polygon(1.5% 0, 98% 2%, 100% 87%, 88% 100%, 0 94%);
 }
 
 .viewport-top {
@@ -259,15 +254,14 @@ button.active {
   display: grid;
   gap: 14px;
   padding: 16px;
-  clip-path: polygon(4% 0, 100% 3%, 96% 100%, 0 94%);
 }
 
 .control-group,
 .match-card {
   padding: 14px;
   border: 1px solid var(--line);
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.04);
-  clip-path: polygon(3% 0, 98% 4%, 100% 82%, 86% 100%, 0 94%);
 }
 
 .match-card {
@@ -360,7 +354,6 @@ select {
 .info-strip article {
   min-height: 130px;
   padding: 18px;
-  clip-path: polygon(6% 0, 100% 9%, 92% 100%, 0 88%);
 }
 
 .info-strip span {

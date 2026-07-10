@@ -137,12 +137,6 @@ select {
   transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, color 180ms ease;
 }
 
-.nav-link {
-  border-color: rgba(215, 111, 159, 0.4);
-  color: var(--text);
-  background: linear-gradient(135deg, rgba(215, 111, 159, 0.16), rgba(240, 199, 119, 0.08));
-}
-
 .nav-button.active {
   border-color: rgba(240, 199, 119, 0.55);
   color: var(--text);
@@ -1550,12 +1544,6 @@ h3 {
 .project-hero:not(.in-view) {
   transform: translateY(20px);
   opacity: 0;
-}
-
-.project-link {
-  display: block;
-  color: var(--text);
-  text-decoration: none;
 }
 
 .project-hero {

@@ -290,8 +290,7 @@ const ML_LABEL_MAP = {
   basalt: "basalt",
   marble: "marble",
   sandstone: "sandstone",
-  limestone: "limestone",
-  slate: "slate"
+  limestone: "limestone"
 };
 const ML_BACKGROUND_LABELS = new Set([
   "sky",
@@ -345,11 +344,26 @@ async function loadMobileNetModel() {
   }
 }
 
+function resolveAppAssetUrl(relativePath) {
+  const baseCandidates = [document.baseURI, window.location.href, document.currentScript?.src, `${window.location.origin}/`].filter(Boolean);
+
+  for (const base of baseCandidates) {
+    try {
+      const url = new URL(relativePath, base);
+      return url.href;
+    } catch (error) {
+      continue;
+    }
+  }
+
+  return relativePath;
+}
+
 async function loadStoneClassifierModel() {
   if (typeof tf === "undefined") return;
   try {
-    const modelUrl = new URL("./model/rock_classifier/tfjs/model.json", window.location.href);
-    const labelsUrl = new URL("./model/rock_classifier/tfjs/class_names.txt", window.location.href);
+    const modelUrl = new URL(resolveAppAssetUrl("./model/rock_classifier/tfjs/model.json"));
+    const labelsUrl = new URL(resolveAppAssetUrl("./model/rock_classifier/tfjs/class_names.txt"));
     modelUrl.searchParams.set("v", MODEL_CACHE_VERSION);
     labelsUrl.searchParams.set("v", MODEL_CACHE_VERSION);
     const modelResponse = await fetch(modelUrl.href);
@@ -578,9 +592,25 @@ function selectStone(id) {
 }
 
 function chooseUpload(file) {
-  if (!file || !file.type.startsWith("image/")) return;
+  if (!file) return;
+  const looksLikeImage = file.type?.startsWith("image/") || /\.(png|jpe?g|webp|gif|bmp)$/i.test(file.name || "");
+  if (!looksLikeImage) {
+    scanStatus.textContent = "Please choose a real image file.";
+    return;
+  }
+
+  scanStatus.textContent = "Reading image...";
+  if (typeof URL !== "undefined" && typeof URL.createObjectURL === "function") {
+    const objectUrl = URL.createObjectURL(file);
+    loadScannedImage(objectUrl);
+    return;
+  }
+
   const reader = new FileReader();
   reader.onload = () => loadScannedImage(reader.result);
+  reader.onerror = () => {
+    scanStatus.textContent = "The image could not be read. Try another file.";
+  };
   reader.readAsDataURL(file);
 }
 
@@ -590,6 +620,11 @@ function loadScannedImage(src) {
   previewImage.src = selectedImage;
   previewImage.style.display = "block";
   emptyState.style.display = "none";
+  previewImage.onerror = () => {
+    scanStatus.textContent = "The image could not be loaded. Try a different file.";
+    previewImage.style.display = "none";
+    emptyState.style.display = "grid";
+  };
   analyzeImageSignature(selectedImage).then(({ signature, quality, mlLabels }) => {
     const match = matchStone(signature, mlLabels, quality);
     const adjustedConfidence = Math.max(24, Math.min(95, match.confidence));
@@ -623,6 +658,11 @@ function loadImageUrl(url) {
     return;
   }
   let source = value;
+  if (source.startsWith("data:image/")) {
+    loadScannedImage(source);
+    urlInput.value = "";
+    return;
+  }
   if (!/^https?:\/\//i.test(source)) {
     source = `https://${source}`;
   }
@@ -941,7 +981,6 @@ function findMlStoneMatch(labels) {
     marble: "marble",
     sandstone: "sandstone",
     limestone: "limestone",
-    slate: "slate",
     quartz: "marble",
     amethyst: "marble",
     lava: "basalt",
@@ -951,7 +990,7 @@ function findMlStoneMatch(labels) {
     stone: null,
     crystal: null,
     "volcanic rock": "basalt",
-    "metamorphic rock": "slate",
+    "metamorphic rock": null,
     "sedimentary rock": "sandstone",
     sky: null,
     cloud: null,
@@ -1401,7 +1440,10 @@ dropZone.addEventListener("dragleave", () => {
 dropZone.addEventListener("drop", (event) => {
   event.preventDefault();
   scanFrame.classList.remove("is-scanning");
-  chooseUpload(event.dataTransfer.files[0]);
+  const droppedImage = event.dataTransfer?.files?.[0] || Array.from(event.dataTransfer?.items || [])
+    .map((item) => item.getAsFile())
+    .find(Boolean);
+  chooseUpload(droppedImage);
 });
 
 document.querySelectorAll(".tab").forEach((button) => {

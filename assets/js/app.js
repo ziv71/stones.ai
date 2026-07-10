@@ -406,6 +406,7 @@ const analysisStrip = document.querySelector("#analysisStrip");
 const resultEmpty = document.querySelector("#resultEmpty");
 const resultCard = document.querySelector("#resultCard");
 const resetButton = document.querySelector("#resetButton");
+const backToScannerButton = document.querySelector("#backToScannerButton");
 const dropZone = document.querySelector("#dropZone");
 const tabPanel = document.querySelector("#tabPanel");
 const scanStatus = document.querySelector("#scanStatus");
@@ -1718,6 +1719,11 @@ resetButton.addEventListener("click", () => {
 
 navButtons.forEach((button) => {
   button.addEventListener("click", () => showPage(button.dataset.page));
+});
+
+backToScannerButton?.addEventListener("click", () => {
+  showPage("scanPage", { scroll: false });
+  document.querySelector(".scanner-panel")?.scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
 dropZone.addEventListener("dragover", (event) => {

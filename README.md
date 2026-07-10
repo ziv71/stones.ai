@@ -7,14 +7,11 @@ A browser-based stone scanner and classifier with a visual storytelling layer. T
 ```text
 stones.ai/
 |-- index.html                  # Main scanner/results page
-|-- crystal-machine.html        # Crystal growth experience page
 |-- assets/
 |   |-- css/
-|   |   |-- styles.css
-|   |   `-- crystal-machine.css
+|   |   `-- styles.css
 |   |-- js/
-|   |   |-- app.js
-|   |   `-- crystal-machine.js
+|   |   `-- app.js
 |   `-- reference/              # Demo/reference images used by training helpers
 |-- model/                      # Runtime/training model artifacts
 |   `-- rock_classifier/
@@ -35,7 +32,6 @@ stones.ai/
 - `index.html` loads the scanner UI.
 - `assets/js/app.js` handles upload, image preprocessing, quality scoring, model inference, matching, and result rendering.
 - `assets/css/styles.css` controls the scanner/results visual design.
-- `crystal-machine.html`, `assets/js/crystal-machine.js`, and `assets/css/crystal-machine.css` are the separate crystal growth experience.
 
 The browser app expects the stronger classifier files at:
 

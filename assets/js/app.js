@@ -188,44 +188,6 @@ const stones = [
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Rock-cut_basin_forms.JPG/500px-Rock-cut_basin_forms.JPG",
     imageSourceUrl: "https://commons.wikimedia.org/wiki/File:Rock-cut_basin_forms.JPG",
     imageCaption: "Limestone rock basin, Wikimedia Commons."
-  },
-  {
-    id: "slate",
-    name: "Slate",
-    category: "Metamorphic rock",
-    colors: "Blue-gray, green, black, purple-gray",
-    texture: "Flat sheets, fine grain",
-    formation: "Shale changed by low-grade metamorphism",
-    found: "Old mountain belts and folded sediments",
-    hardness: "Medium",
-    eco: 29,
-    ecoLabel: "Lower impact when durable",
-    confidence: 90,
-    signature: { brightness: 0.25, saturation: 0.23, warmth: 0.3, contrast: 0.34, edge: 0.56 },
-    fact: "Slate splits into thin sheets, which made it useful for roofs and writing tablets.",
-    ecology: [
-      "Long-lasting slate roofs can reduce replacement waste over decades.",
-      "Quarries still need land restoration and careful water management.",
-      "Using reclaimed slate tiles preserves embodied energy and historic material."
-    ],
-    art: [
-      "Ideal for roof patterns, engraved signs, drawing tablets, and dark display bases.",
-      "Sheet-like cleavage inspires layered paper art, relief maps, and architectural cladding.",
-      "Broken slate can become garden labels, mosaics, or textured wall panels."
-    ],
-    life: [
-      ["Mud to shale", "Fine mud settles, compacts, and becomes shale."],
-      ["Mountain pressure", "Pressure changes the shale into slate with strong flat cleavage."],
-      ["Split sheets", "Craftspeople separate it into thin durable layers."],
-      ["Reuse", "Old tiles can be salvaged for roofs, gardens, and art projects."]
-    ],
-    svg: "slate",
-    accentColor: "#7f8790",
-    softColor: "rgba(127, 135, 144, 0.14)",
-    glowColor: "rgba(151, 159, 169, 0.12)",
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/a/af/SlateUSGOV.jpg",
-    imageSourceUrl: "https://commons.wikimedia.org/wiki/File:SlateUSGOV.jpg",
-    imageCaption: "Slate rock, Wikimedia Commons."
   }
 ];
 
@@ -236,8 +198,7 @@ const ML_LABEL_MAP = {
   basalt: "basalt",
   marble: "marble",
   sandstone: "sandstone",
-  limestone: "limestone",
-  slate: "slate"
+  limestone: "limestone"
 };
 const ML_BACKGROUND_LABELS = new Set([
   "sky",
@@ -902,7 +863,6 @@ function findMlStoneMatch(labels) {
     marble: "marble",
     sandstone: "sandstone",
     limestone: "limestone",
-    slate: "slate",
     quartz: "marble",
     amethyst: "marble",
     lava: "basalt",
@@ -912,7 +872,7 @@ function findMlStoneMatch(labels) {
     stone: null,
     crystal: null,
     "volcanic rock": "basalt",
-    "metamorphic rock": "slate",
+    "metamorphic rock": null,
     "sedimentary rock": "sandstone",
     sky: null,
     cloud: null,

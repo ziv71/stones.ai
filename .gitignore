@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# Local training data and generated model artifacts can be rebuilt.
+datasets/
+model/rock_classifier/*.h5
+model/rock_classifier/tfjs/*.keras
+model/rock_classifier/tfjs/saved_model/

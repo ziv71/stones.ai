@@ -368,6 +368,16 @@ h3,
   color: #f3f0eb;
 }
 
+/* Solid stone identity colors for the brand header. */
+.app-header h1 {
+  color: #b7a58e;
+  background: none;
+  -webkit-background-clip: border-box;
+  -webkit-text-fill-color: currentColor;
+  background-clip: border-box;
+  text-shadow: 0 3px 20px rgba(0, 0, 0, 0.3);
+}
+
 p,
 span,
 strong,

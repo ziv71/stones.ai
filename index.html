@@ -48,7 +48,7 @@
                 <span>Recognition Chamber</span>
                 <strong id="scanStatus">Standby</strong>
               </div>
-              <div class="scan-frame" id="scanFrame">
+              <div class="scan-frame" id="scanFrame" role="button" tabindex="0" aria-label="Choose, paste, or drop a stone image">
                 <div class="scan-grid"></div>
                 <div class="scan-line" id="scanLine"></div>
                 <div class="scan-orbit"></div>
@@ -62,8 +62,8 @@
                 <img id="previewImage" alt="Selected stone preview" />
                 <div class="empty-state" id="emptyState">
                   <span class="scanner-icon">SCAN</span>
-                  <strong>Drop stone image</strong>
-                  <small>or select a curated sample in Library</small>
+                  <strong>Drop or click to choose</strong>
+                  <small>You can also paste an image or image URL</small>
                 </div>
               </div>
               <div class="signal-grid" id="signalGrid" aria-label="Visual signal metrics">
@@ -84,11 +84,11 @@
                 <label class="primary-button file-button" for="fileInput">Upload Image</label>
                 <input id="fileInput" type="file" accept="image/*" />
                 <button class="secondary-button" id="pasteButton" type="button">Paste Image</button>
-                <input id="urlInput" type="text" placeholder="Image URL" aria-label="Image URL" />
+                <input id="urlInput" type="url" inputmode="url" autocomplete="url" placeholder="Paste image URL" aria-label="Image URL" />
                 <button class="secondary-button" id="urlButton" type="button">Use URL</button>
                 <button class="primary-button" id="scanButton" type="button">Scan Stone</button>
               </div>
-              <p class="scan-hint">Tip: press Ctrl+V with a rock image or paste a direct stone photo URL.</p>
+              <p class="scan-hint" id="scanHint">Choose a file, drop it here, press Ctrl+V, or paste a direct image URL. Press Enter to load a URL.</p>
             </div>
           </div>
 

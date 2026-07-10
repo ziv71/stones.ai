@@ -3,29 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Scan & Identify | Stone Discovery</title>
+    <title>STONE.AI | Stone Discovery</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="assets/css/styles.css?v=rock-palette-7" />
   </head>
   <body>
     <div class="ambient-field" aria-hidden="true"></div>
     <main class="app-shell">
       <header class="app-header">
         <div>
-          <p class="eyebrow">Mineral Art Recognition Studio</p>
-          <h1>Scan & Identify</h1>
+          <h1>STONE.AI</h1>
         </div>
         <nav class="app-nav" aria-label="Main pages">
           <button class="nav-button active" type="button" data-page="scanPage">Scan</button>
           <button class="nav-button" type="button" data-page="libraryPage">Library</button>
-          <button class="nav-button" type="button" data-page="resultsPage">Results</button>
           <button class="nav-button" type="button" data-page="projectPage">Project</button>
-          <a class="nav-button nav-link" href="crystal-machine.html">Crystal Machine</a>
         </nav>
         <div class="top-actions">
-          <span class="system-pill">Local visual model</span>
           <button class="ghost-button" id="resetButton" type="button" title="Start over">Reset</button>
         </div>
       </header>
@@ -34,9 +30,9 @@
         <div class="scanner-panel">
           <div class="hero-grid">
             <div class="scan-copy">
-              <p class="tagline">Scan a stone. Discover its story.</p>
+              <p class="tagline">Scan a stone - and find out about the art behind it.</p>
               <p class="intro">
-                Upload an image, drop it into the chamber, or choose a curated profile from the Library page.
+                Upload an image, paste a stone photo, drop it into the chamber, or use a URL from the web.
                 The app reads visual signals and turns them into a geology, ecology, and art experience.
               </p>
               <div class="hero-stats" aria-label="Project highlights">
@@ -51,7 +47,7 @@
                 <span>Recognition Chamber</span>
                 <strong id="scanStatus">Standby</strong>
               </div>
-              <div class="scan-frame" id="scanFrame">
+              <div class="scan-frame" id="scanFrame" role="button" tabindex="0" aria-label="Choose, paste, or drop a stone image">
                 <div class="scan-grid"></div>
                 <div class="scan-line" id="scanLine"></div>
                 <div class="scan-orbit"></div>
@@ -65,8 +61,8 @@
                 <img id="previewImage" alt="Selected stone preview" />
                 <div class="empty-state" id="emptyState">
                   <span class="scanner-icon">SCAN</span>
-                  <strong>Drop stone image</strong>
-                  <small>or select a curated sample in Library</small>
+                  <strong>Drop or click to choose</strong>
+                  <small>You can also paste an image or image URL</small>
                 </div>
               </div>
               <div class="signal-grid" id="signalGrid" aria-label="Visual signal metrics">
@@ -86,8 +82,12 @@
               <div class="scanner-actions">
                 <label class="primary-button file-button" for="fileInput">Upload Image</label>
                 <input id="fileInput" type="file" accept="image/*" />
+                <button class="secondary-button" id="pasteButton" type="button">Paste Image</button>
+                <input id="urlInput" type="url" inputmode="url" autocomplete="url" placeholder="Paste image URL" aria-label="Image URL" />
+                <button class="secondary-button" id="urlButton" type="button">Use URL</button>
                 <button class="primary-button" id="scanButton" type="button">Scan Stone</button>
               </div>
+              <p class="scan-hint" id="scanHint">Choose a file, drop it here, press Ctrl+V, or paste a direct image URL. Press Enter to load a URL.</p>
             </div>
           </div>
 
@@ -97,6 +97,52 @@
             <span data-step="Origin model">Origin model</span>
             <span data-step="Eco impact">Eco impact</span>
           </div>
+
+          <section class="results-panel" aria-label="Stone result">
+            <div class="result-empty" id="resultEmpty">
+              <p class="eyebrow">Awaiting Scan</p>
+              <h2>Ready to reveal the stone profile.</h2>
+              <p>Select or upload a stone, press scan, and unlock geology, ecology, art ideas, and a life-story timeline.</p>
+              
+            </div>
+
+            <article class="result-card hidden" id="resultCard">
+              <div class="result-media">
+                <div class="result-stone-art" id="resultStoneArt"></div>
+                <div class="result-scan-line"></div>
+              </div>
+              <div class="result-hero">
+                <div>
+                  <p class="eyebrow" id="confidenceLabel">Identification</p>
+                  <h2 id="stoneName">Granite</h2>
+                  <p id="stoneCategory">Igneous rock</p>
+                </div>
+                <div class="confidence-meter" aria-label="Identification confidence" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="94">
+                  <div class="confidence-info">
+                    <strong id="confidenceValue">94%</strong>
+                    <span>match</span>
+                  </div>
+                  <div class="confidence-bar" aria-hidden="true">
+                    <div class="confidence-fill"></div>
+                  </div>
+                </div>
+                <p class="quality-notice" id="qualityNotice"></p>
+              </div>
+
+              <div class="quick-facts" id="quickFacts"></div>
+              <button class="secondary-button back-to-scanner-button" id="backToScannerButton" type="button">Go back to scanner</button>
+
+              <nav class="tabs" aria-label="Result sections">
+                <button class="tab active" type="button" data-tab="about">About</button>
+                <button class="tab" type="button" data-tab="ecology">Ecology</button>
+                <button class="tab" type="button" data-tab="art">Art</button>
+                <button class="tab" type="button" data-tab="life">Life Story</button>
+                <button class="tab" type="button" data-tab="compare">Compare</button>
+              </nav>
+
+              <div class="tab-panel" id="tabPanel"></div>
+            </article>
+          </section>
         </div>
       </section>
 
@@ -113,97 +159,51 @@
         </div>
       </section>
 
-      <section class="app-page results-page" id="resultsPage" aria-label="Stone result page">
-        <section class="results-panel" aria-label="Stone result">
-          <div class="result-empty" id="resultEmpty">
-            <p class="eyebrow">Awaiting Scan</p>
-            <h2>Ready to reveal the stone profile.</h2>
-            <p>Select or upload a stone, press scan, and unlock geology, ecology, art ideas, and a life-story timeline.</p>
-            <div class="empty-console">
-              <span>Surface model idle</span>
-              <span>Ecology panel locked</span>
-              <span>Story timeline pending</span>
-            </div>
-          </div>
-
-          <article class="result-card hidden" id="resultCard">
-            <div class="result-media">
-              <div class="result-stone-art" id="resultStoneArt"></div>
-              <div class="result-scan-line"></div>
-            </div>
-            <div class="result-hero">
-              <div>
-                <p class="eyebrow" id="confidenceLabel">Identification</p>
-                <h2 id="stoneName">Granite</h2>
-                <p id="stoneCategory">Igneous rock</p>
-              </div>
-              <div class="confidence-meter" aria-label="Identification confidence">
-                <strong id="confidenceValue">94%</strong>
-                <span>match</span>
-              </div>
-              <p class="quality-notice" id="qualityNotice"></p>
-            </div>
-
-            <div class="quick-facts" id="quickFacts"></div>
-
-            <nav class="tabs" aria-label="Result sections">
-              <button class="tab active" type="button" data-tab="about">About</button>
-              <button class="tab" type="button" data-tab="ecology">Ecology</button>
-              <button class="tab" type="button" data-tab="art">Art</button>
-              <button class="tab" type="button" data-tab="life">Life Story</button>
-              <button class="tab" type="button" data-tab="compare">Compare</button>
-            </nav>
-
-            <div class="tab-panel" id="tabPanel"></div>
-            <a class="crystal-cta" href="crystal-machine.html">
-              <span>Grow a crystal from this stone</span>
-              <strong>Open Crystal Machine</strong>
-            </a>
-          </article>
-        </section>
-      </section>
-
-      <section class="app-page" id="projectPage" aria-label="Project story page">
+      <section class="app-page" id="projectPage" aria-label="About the project page">
         <div class="page-panel project-grid">
           <div class="project-hero">
-            <p class="eyebrow">Art + Earth Pitch</p>
-            <h2>A stone becomes a living artwork with a scientific story.</h2>
+            <p class="eyebrow">About the project &amp; instructions</p>
+            <h2>How to use the scanner and read the results with calm, natural clarity.</h2>
             <p>
-              Scan & Identify turns minerals into a digital exhibition. Each scan reveals the stone as both a
-              natural material and an artistic texture for sculpture, architecture, mosaics, and eco-design.
+              Upload a clear photo of one stone. STONE.AI compares its visible color, texture, and pattern with the
+              rock types in its library. It then shows the closest match, how that rock forms, its environmental impact, and common artistic uses.
             </p>
+            <div class="project-hero-meta">
+              <span>1. Add photo</span>
+              <span>2. Scan</span>
+              <span>3. Review</span>
+            </div>
+            <div class="project-hero-callout">
+              <strong>For a better result</strong>
+              <p>Use a sharp, well-lit photo with the stone centered and as little background clutter as possible. The identification is an estimate, so compare the suggested match with the details shown.</p>
+            </div>
           </div>
           <div class="project-card">
             <span>01</span>
-            <h3>Stone-Shaped Interface</h3>
-            <p>Navigation and actions feel like cut minerals instead of normal flat buttons.</p>
+            <h3>Upload or select a sample</h3>
+            <p>The experience starts by choosing a real stone photo from the gallery or dropping your own image into the scanner.</p>
           </div>
           <div class="project-card">
             <span>02</span>
-            <h3>Gallery Result</h3>
-            <p>Each result frames the stone like an artwork with origin, texture, and properties.</p>
+            <h3>Analyze visual signals</h3>
+            <p>The app evaluates color, contrast, brightness, and texture to create a visual signature for the sample.</p>
           </div>
           <div class="project-card">
             <span>03</span>
-            <h3>Earth Layer</h3>
-            <p>The app connects materials to mining, habitats, water, soil, and responsible use.</p>
+            <h3>Match to curated profiles</h3>
+            <p>That signature is compared against curated stone profiles to find the closest geological match.</p>
           </div>
           <div class="project-card">
             <span>04</span>
-            <h3>Creative Layer</h3>
-            <p>Natural textures become ideas for sculpture, architecture, mosaics, and eco-design.</p>
+            <h3>Reveal stone context</h3>
+            <p>The result page explains the rock type, formation, ecology, and artistic uses to make each stone informative.</p>
           </div>
-          <a class="project-card project-link" href="crystal-machine.html">
-            <span>05</span>
-            <h3>Crystal Growth Machine</h3>
-            <p>After scanning a stone, grow a procedural mineral inspired by crystallization and generative art.</p>
-          </a>
         </div>
       </section>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.13.0/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@3.1.0/dist/mobilenet.min.js"></script>
-    <script src="app.js"></script>
+    <script src="assets/js/app.js"></script>
   </body>
 </html>

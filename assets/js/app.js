@@ -1726,23 +1726,33 @@ backToScannerButton?.addEventListener("click", () => {
   document.querySelector(".scanner-panel")?.scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
+let dragDepth = 0;
+
+function setDropZoneActive(isActive) {
+  dropZone.classList.toggle("is-dragging", isActive);
+  scanStatus.textContent = isActive ? "Drop to load" : selectedImage ? "Image loaded" : "Standby";
+}
+
+dropZone.addEventListener("dragenter", (event) => {
+  event.preventDefault();
+  dragDepth += 1;
+  if (dragDepth === 1) setDropZoneActive(true);
+});
+
 dropZone.addEventListener("dragover", (event) => {
   event.preventDefault();
   if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
-  dropZone.classList.add("is-dragging");
-  scanFrame.classList.add("is-scanning");
-  scanStatus.textContent = "Drop to load";
 });
 
-dropZone.addEventListener("dragleave", () => {
-  dropZone.classList.remove("is-dragging");
-  scanFrame.classList.remove("is-scanning");
-  scanStatus.textContent = selectedImage ? "Image loaded" : "Standby";
+dropZone.addEventListener("dragleave", (event) => {
+  event.preventDefault();
+  dragDepth = Math.max(0, dragDepth - 1);
+  if (dragDepth === 0) setDropZoneActive(false);
 });
 dropZone.addEventListener("drop", (event) => {
   event.preventDefault();
-  dropZone.classList.remove("is-dragging");
-  scanFrame.classList.remove("is-scanning");
+  dragDepth = 0;
+  setDropZoneActive(false);
   const droppedImage = event.dataTransfer?.files?.[0] || Array.from(event.dataTransfer?.items || [])
     .map((item) => item.getAsFile())
     .find(Boolean);

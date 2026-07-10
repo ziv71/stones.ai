@@ -606,10 +606,26 @@ function loadImageUrl(url) {
     scanStatus.textContent = "Enter a valid image URL or paste a stone photo.";
     return;
   }
+
   let source = value;
-  if (!/^https?:\/\//i.test(source)) {
+  if (!/^https?:\/\//i.test(source) && !/^\/\//.test(source)) {
+    if (!/^[a-z0-9.-]+\.[a-z]{2,}(?:\/|$)/i.test(source) && !source.includes("/")) {
+      scanStatus.textContent = "Enter a valid image URL or paste a stone photo.";
+      return;
+    }
     source = `https://${source}`;
   }
+
+  try {
+    const parsedUrl = new URL(source);
+    if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+      throw new Error("Unsupported protocol");
+    }
+  } catch (error) {
+    scanStatus.textContent = "Enter a valid image URL or paste a stone photo.";
+    return;
+  }
+
   scanStatus.textContent = "Loading image from URL...";
   urlInput.value = "";
   loadScannedImage(source);
